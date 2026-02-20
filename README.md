@@ -10,12 +10,13 @@ Inertia replaces the stepped, clunky feel of mouse wheel scrolling on macOS with
 
 - **Smooth inertial scrolling** — physics-based momentum that coasts naturally after each wheel tick
 - **Speed presets** — Slow, Medium, Fast (plus Custom)
-- **Smoothness presets** — Off, Low, Regular, High
+- **Smoothness presets** — Low, Regular, High
 - **Base Speed slider** — always visible, fine-grained control
-- **Advanced controls** — Curve Steepness, Momentum Duration, Minimum Tick Size
+- **Advanced controls** — Curve Steepness, Momentum Duration
 - **Live preview** — test your settings inside the app
 - **Lightweight menubar app** — no Dock icon, runs silently in the background
 - **Mouse-only** — trackpad behavior is left completely untouched
+- **Works everywhere** — consistent scroll feel across all apps including Terminal
 
 ## Planned for v1.0
 
@@ -36,6 +37,12 @@ Inertia replaces the stepped, clunky feel of mouse wheel scrolling on macOS with
 ## Installation
 
 > Coming soon — v0.8 in development.
+
+Build from source:
+1. Clone this repo
+2. Open `Inertia.xcodeproj` in Xcode
+3. Build and run (Cmd+R)
+4. Grant Accessibility permission when prompted
 
 ---
 
