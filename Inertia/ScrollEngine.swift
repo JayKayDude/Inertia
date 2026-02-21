@@ -1,6 +1,7 @@
 import Foundation
 import CoreGraphics
 import ApplicationServices
+import AppKit
 import os.lock
 
 class ScrollEngine: ObservableObject {
@@ -18,6 +19,7 @@ class ScrollEngine: ObservableObject {
     private var animating = false
     private var subPixelAccumulator: Double = 0
     private var lineSubPixelAccumulator: Double = 0
+    private var scrollOriginWindow: Int = 0
 
     private var cachedFriction: Double = 0.96
     private var cachedBaseSpeed: Double = 4.0
@@ -98,6 +100,8 @@ class ScrollEngine: ObservableObject {
         let rawDelta = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
         if abs(rawDelta) < 0.001 { return event }
 
+        scrollOriginWindow = windowUnderCursor()
+
         let now = CFAbsoluteTimeGetCurrent()
         let dt = now - lastTickTime
 
@@ -174,6 +178,14 @@ class ScrollEngine: ObservableObject {
         let n = Double(consecutiveSwipeCount - threshold)
         let factor = initial * pow(exponential, n / exponential)
         return min(factor, 50.0)
+    }
+
+    private func windowUnderCursor() -> Int {
+        guard let event = CGEvent(source: nil) else { return 0 }
+        let cgPoint = event.location
+        let screenHeight = NSScreen.screens.first?.frame.height ?? 0
+        let cocoaPoint = NSPoint(x: cgPoint.x, y: screenHeight - cgPoint.y)
+        return NSWindow.windowNumber(at: cocoaPoint, belowWindowWithWindowNumber: 0)
     }
 
     private func computeSpeed(tickRate: Double) -> Double {
@@ -270,6 +282,21 @@ class ScrollEngine: ObservableObject {
             animationTimer?.cancel()
             animationTimer = nil
             return
+        }
+
+        let inMomentum = CFAbsoluteTimeGetCurrent() - lastTickTime > 0.15
+        if inMomentum {
+            let currentWindow = windowUnderCursor()
+            if currentWindow != scrollOriginWindow && currentWindow != 0 {
+                animating = false
+                velocity = 0
+                subPixelAccumulator = 0
+                lineSubPixelAccumulator = 0
+                lock.unlock()
+                animationTimer?.cancel()
+                animationTimer = nil
+                return
+            }
         }
 
         let pixelDelta = velocity * ScrollEngine.frameInterval
