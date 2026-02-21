@@ -44,6 +44,7 @@ class ScrollEngine: ObservableObject {
     private static let pixelsPerTick: Double = 45.0
     private static let velocityThreshold: Double = 120.0
     private static let pixelsPerLine: Double = 10.0
+    private static let referenceSmoothness: Double = 0.9
 
     func start() {
         guard !isRunning else { return }
@@ -149,10 +150,13 @@ class ScrollEngine: ObservableObject {
         let fast = fastScrollFactor()
         let impulse = direction * speed * ScrollEngine.pixelsPerTick * fast
 
+        let effectiveSmoothness = min(cachedSmoothness, ScrollEngine.referenceSmoothness)
+        let compensation = (1.0 - effectiveSmoothness) / (1.0 - ScrollEngine.referenceSmoothness)
+
         lock.lock()
         if direction > 0 && velocity < 0 { velocity = 0 }
         if direction < 0 && velocity > 0 { velocity = 0 }
-        velocity = velocity * cachedSmoothness + impulse
+        velocity = velocity * effectiveSmoothness + impulse * compensation
         let maxVelocity = cachedBaseSpeed * 3.0 * ScrollEngine.pixelsPerTick * 4.0 * fast
         velocity = min(max(velocity, -maxVelocity), maxVelocity)
         lock.unlock()
