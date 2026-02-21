@@ -125,3 +125,4 @@ class PreviewTextView: NSTextView {
         scrollView.reflectScrolledClipView(clipView)
     }
 }
+
