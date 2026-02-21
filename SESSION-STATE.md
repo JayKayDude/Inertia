@@ -6,7 +6,7 @@
 2026-02-20
 
 ## Current Phase
-v0.8 — All phases implemented, tuning scroll feel
+v0.8 — All phases implemented, credits & icons added
 
 ## What Was Decided
 - Build from scratch in pure Swift/SwiftUI (not fork MMF)
@@ -27,12 +27,16 @@ v0.8 — All phases implemented, tuning scroll feel
 - Settings UI with presets and advanced sliders
 - Live preview panel operational
 - Enable/disable toggle fixed
-- First commit pushed to GitHub
+- Credits window with MMF and Freepik attribution
+- Custom app icon (colored triskelion, all sizes)
+- Custom menubar icon (B&W template, adapts to light/dark)
+- Inline credits removed from Settings footer
 
 ## Next Actions
 - [ ] Further tune scroll feel to match MMF more closely
 - [ ] Consider recalibrating preset pixel values to MMF ranges
 - [ ] Improve live preview to show momentum/inertia
+- [ ] Signed .app / .dmg distribution
 - [ ] v1.0 features: curve editor, per-app profiles
 
 ## Open Questions

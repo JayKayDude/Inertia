@@ -37,6 +37,9 @@
 | 2026-02-20 | **Half-life friction model** | `friction = pow(0.5, 1/halfLifeFrames)` — approximates MMF's drag curve | Active |
 | 2026-02-20 | **NSLock for thread safety** | DispatchQueue.sync caused deadlocks (CGEvent.post dispatches to main thread) | Active |
 | 2026-02-20 | **Custom Binding for enable toggle** | @AppStorage on ObservableObject doesn't trigger onChange; custom Binding calls start/stop directly | Active |
+| 2026-02-20 | **Credits window (not inline footer)** | Consolidates all attribution (MMF, Freepik icon) into dedicated window accessible from menubar | Active |
+| 2026-02-20 | **Custom menubar icon (template)** | B&W icon with `template-rendering-intent` so macOS adapts it to light/dark mode | Active |
+| 2026-02-20 | **App icon from Freepik/Flaticon** | Colored triskelion icon, resized via sips to all 10 required macOS sizes | Active |
 | 2026-02-20 | **Removed minTickSize** | Was in config/UI but never used by engine; dead code removed | Active |
 | 2026-02-20 | **Tick rate smoothing (rolling avg of 3)** | Matches MMF's RollingAverage(capacity: 3) for stable speed curve input | Active |
 | 2026-02-20 | **velocityThreshold = 120** | Stops animation when <1 px/frame; old value (3.0) ran animation far too long | Active |
@@ -54,7 +57,7 @@
 - Visual draggable curve editor (Bezier control points)
 - Per-app scroll profiles
 - Import/export settings
-- App icon, signed distribution, Homebrew tap
+- ~~App icon~~ (done), signed distribution, Homebrew tap
 
 ## Scroll Engine Technical Details
 
@@ -97,16 +100,18 @@ clamped to [1.0, 3.0]
 | 4     | Settings window | 2026-02-19 |
 | 5     | Live preview panel | 2026-02-19 |
 | —     | Scroll feel tuning & bug fixes | 2026-02-20 |
+| 6     | Credits window & custom icons | 2026-02-20 |
 
 ## Key File Locations
 | File | Purpose |
 |------|---------|
-| `Inertia/InertiaApp.swift` | App entry, MenuBarExtra, enable toggle |
+| `Inertia/InertiaApp.swift` | App entry, MenuBarExtra, enable toggle, settings/credits windows |
 | `Inertia/ScrollEngine.swift` | CGEventTap, velocity, momentum, event posting |
 | `Inertia/ScrollConfig.swift` | Parameters, presets, @AppStorage |
 | `Inertia/AccessibilityManager.swift` | Permission check & prompt |
 | `Inertia/SettingsView.swift` | Main settings window |
 | `Inertia/LivePreviewView.swift` | Scrollable preview panel |
+| `Inertia/CreditsView.swift` | Credits window (MMF, Freepik attribution) |
 | `CLAUDE.md` | Standing instructions for Claude Code |
 | `SESSION-STATE.md` | Per-session progress tracker |
 | `PROJECT-MEMORY.md` | This file — decisions and context |

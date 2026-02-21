@@ -35,13 +35,20 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Base Speed slider always visible
 - [x] "Custom" label when slider != preset
 - [x] Expandable Advanced section (Curve Steepness, Momentum Duration)
-- [x] MMF attribution footer, Reset to Defaults
+- [x] Reset to Defaults button in footer
 
 ### Phase 5 — Live Preview Panel
 - [x] `LivePreviewView.swift` — scrollable text inside settings
 - [x] Captures mouse wheel input directly (not via CGEventTap)
 - [x] Applies current scroll config in real time
 - [x] Isolated from system scrolling
+
+### Phase 6 — Credits & Icons
+- [x] `CreditsView.swift` — dedicated Credits window (MMF, Freepik attribution, GitHub link)
+- [x] Credits menu item in MenuBarExtra (between Settings and Quit)
+- [x] Custom app icon — colored triskelion in all required sizes (16–1024)
+- [x] Custom menubar icon — B&W template icon (adapts to light/dark mode)
+- [x] Removed inline credits from Settings footer
 
 ### Bug Fixes & Tuning
 - [x] Fix Terminal scrolling too fast (FixedPtDeltaAxis1 was pixel, not line)
@@ -69,6 +76,6 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 ### Other
 - [ ] Per-app scroll profiles
 - [ ] Import/export settings
-- [ ] App icon design
+- [x] ~~App icon design~~ (done in v0.8)
 - [ ] Signed .app / .dmg distribution
 - [ ] Homebrew tap

@@ -127,25 +127,9 @@ struct SettingsView: View {
     }
 
     private var footerSection: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Text("Based on ")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-                +
-                Text("[Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix)")
-                    .font(.caption)
-
-                Spacer()
-
-                Link("GitHub", destination: URL(string: "https://github.com/JayKayDude/Inertia")!)
-                    .font(.caption)
-            }
-
-            Button("Reset to Defaults") {
-                config.resetToDefaults()
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
+        Button("Reset to Defaults") {
+            config.resetToDefaults()
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }

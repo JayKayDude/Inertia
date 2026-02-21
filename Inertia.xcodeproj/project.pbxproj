@@ -14,6 +14,7 @@
 		A10000010000000000000005 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000005; };
 		A10000010000000000000006 /* LivePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000006; };
 		A10000010000000000000007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000007; };
+		A10000010000000000000009 /* CreditsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000009; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		A10000020000000000000006 /* LivePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePreviewView.swift; sourceTree = "<group>"; };
 		A10000020000000000000007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10000020000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000020000000000000009 /* CreditsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditsView.swift; sourceTree = "<group>"; };
 		A10000030000000000000001 /* Inertia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inertia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -56,6 +58,7 @@
 				A10000020000000000000004 /* AccessibilityManager.swift */,
 				A10000020000000000000005 /* SettingsView.swift */,
 				A10000020000000000000006 /* LivePreviewView.swift */,
+				A10000020000000000000009 /* CreditsView.swift */,
 				A10000020000000000000007 /* Assets.xcassets */,
 				A10000020000000000000008 /* Info.plist */,
 			);
@@ -145,6 +148,7 @@
 				A10000010000000000000004 /* AccessibilityManager.swift in Sources */,
 				A10000010000000000000005 /* SettingsView.swift in Sources */,
 				A10000010000000000000006 /* LivePreviewView.swift in Sources */,
+				A10000010000000000000009 /* CreditsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

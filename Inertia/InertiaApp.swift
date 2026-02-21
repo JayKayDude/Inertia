@@ -7,7 +7,7 @@ struct InertiaApp: App {
     @StateObject private var engine = ScrollEngine.shared
 
     var body: some Scene {
-        MenuBarExtra("Inertia", systemImage: "computermouse.fill") {
+        MenuBarExtra("Inertia", image: "MenuBarIcon") {
             Toggle("Enable Inertia", isOn: Binding(
                 get: { config.enabled },
                 set: { newValue in
@@ -27,6 +27,10 @@ struct InertiaApp: App {
             }
             .keyboardShortcut(",", modifiers: .command)
 
+            Button("Credits") {
+                appDelegate.showCredits()
+            }
+
             Divider()
 
             Button("Quit Inertia") {
@@ -40,6 +44,7 @@ struct InertiaApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindow: NSWindow?
+    private var creditsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSLog("[Inertia] App launched")
@@ -74,5 +79,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
 
         settingsWindow = window
+    }
+
+    func showCredits() {
+        if let window = creditsWindow {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let hostingController = NSHostingController(rootView: CreditsView())
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "Credits"
+        window.styleMask = [.titled, .closable]
+        window.setContentSize(NSSize(width: 350, height: 250))
+        window.center()
+        window.isReleasedWhenClosed = false
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+
+        creditsWindow = window
     }
 }

@@ -14,7 +14,9 @@ Inertia replaces the stepped, clunky feel of mouse wheel scrolling on macOS with
 - **Base Speed slider** — always visible, fine-grained control
 - **Advanced controls** — Curve Steepness, Momentum Duration
 - **Live preview** — test your settings inside the app
+- **Custom menubar icon** — template icon adapts to light/dark mode
 - **Lightweight menubar app** — no Dock icon, runs silently in the background
+- **Credits window** — consolidated attribution for all dependencies
 - **Mouse-only** — trackpad behavior is left completely untouched
 - **Works everywhere** — consistent scroll feel across all apps including Terminal
 
@@ -48,7 +50,9 @@ Build from source:
 
 ## Based On
 
-Inertia's scroll physics are adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) by Noah Nuebling. Inertia is a derivative work with substantial changes: completely rewritten engine in pure Swift, new SwiftUI interface, stripped to smooth scrolling only, and released free and open source. Full attribution to the original author is maintained.
+Inertia's scroll physics are adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) by Noah Nuebling. Inertia is a derivative work with substantial changes: completely rewritten engine in pure Swift, new SwiftUI interface, stripped to smooth scrolling only, and released free and open source. Full attribution is maintained in the app's Credits window.
+
+App icon created by [Freepik — Flaticon](https://www.flaticon.com/free-icons/inertia).
 
 ---
 
