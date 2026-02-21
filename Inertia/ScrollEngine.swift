@@ -23,8 +23,13 @@ class ScrollEngine: ObservableObject {
 
     private var cachedFriction: Double = 0.96
     private var cachedBaseSpeed: Double = 4.0
-    private var cachedCurveExponent: Double = 1.5
     private var cachedSmoothness: Double = 0.6
+
+    private var cachedModifierHotkeysEnabled: Bool = true
+    private var cachedFastModifierFlags: CGEventFlags = .maskControl
+    private var cachedSlowModifierFlags: CGEventFlags = .maskAlternate
+    private var cachedFastMultiplier: Double = 2.0
+    private var cachedSlowMultiplier: Double = 0.5
 
     private let config = ScrollConfig.shared
     private let lock = NSLock()
@@ -119,8 +124,12 @@ class ScrollEngine: ObservableObject {
         lastTickTime = now
 
         cachedBaseSpeed = config.baseSpeed
-        cachedCurveExponent = config.curveExponent
         cachedSmoothness = config.smoothness
+        cachedModifierHotkeysEnabled = config.modifierHotkeysEnabled
+        cachedFastModifierFlags = (ModifierKey(rawValue: config.fastModifier) ?? .control).flags
+        cachedSlowModifierFlags = (ModifierKey(rawValue: config.slowModifier) ?? .option).flags
+        cachedFastMultiplier = config.fastMultiplier
+        cachedSlowMultiplier = config.slowMultiplier
 
         let md = config.momentumDuration
         let halfLifeSeconds = 0.02 + md * 0.2
@@ -152,7 +161,16 @@ class ScrollEngine: ObservableObject {
 
         let speed = computeSpeed(tickRate: tickRate)
         let fast = fastScrollFactor()
-        let impulse = direction * speed * ScrollEngine.pixelsPerTick * fast
+        var impulse = direction * speed * ScrollEngine.pixelsPerTick * fast
+
+        if cachedModifierHotkeysEnabled {
+            let flags = CGEventSource.flagsState(.combinedSessionState)
+            if flags.contains(cachedFastModifierFlags) {
+                impulse *= cachedFastMultiplier
+            } else if flags.contains(cachedSlowModifierFlags) {
+                impulse *= cachedSlowMultiplier
+            }
+        }
 
         let effectiveSmoothness = min(cachedSmoothness, ScrollEngine.referenceSmoothness)
         let compensation = (1.0 - effectiveSmoothness) / (1.0 - ScrollEngine.referenceSmoothness)
@@ -191,7 +209,7 @@ class ScrollEngine: ObservableObject {
     private func computeSpeed(tickRate: Double) -> Double {
         let base = cachedBaseSpeed
         let b = 1.1
-        let c = cachedCurveExponent
+        let c = 1.5
         let t = 8.0
         let p = 1.33
         let denominator = pow(b, c) - 1.0
