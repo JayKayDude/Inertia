@@ -28,7 +28,7 @@
 | 2026-02-18 | Menubar-only app, no Dock icon | Lightweight background utility pattern | Active |
 | 2026-02-18 | Intercept mouse wheel events only, leave trackpads alone | Trackpads already have system-level inertia | Active |
 | 2026-02-19 | **Build from scratch, not fork MMF** | MMF is Obj-C with deep dependencies; clean Swift rewrite is simpler | Active |
-| 2026-02-19 | **v0.8/v1.0 versioning** | v0.8 = working app, v1.0 = curve editor + per-app profiles | Active |
+| 2026-02-19 | **v1.0/v2.0 versioning** | v1.0 = initial release, v2.0 = curve editor + per-app profiles | Active |
 | 2026-02-19 | **Smoothness presets: Low/Regular/High** | ~~Off/Low/Regular/High~~ — Off removed since smooth scrolling is the app's purpose | Active |
 | 2026-02-19 | Base Speed slider always visible | Most users only need one slider | Active |
 | 2026-02-19 | Preset ↔ slider sync with "Custom" label | Selecting preset moves slider; dragging away shows Custom | Active |
@@ -53,7 +53,7 @@
 
 ## Versioning
 
-### v0.8 — Working App (implemented)
+### v1.0 — Initial Release (implemented)
 - Scroll engine (CGEventTap + DispatchSourceTimer + MMF physics)
 - Menubar with enable toggle
 - Settings window: enable toggle, speed/smoothness presets with sliders, modifier hotkeys, live preview
@@ -61,7 +61,7 @@
 - Accessibility permission prompt
 - Thread-safe animation with NSLock
 
-### v1.0 — Full Release
+### v2.0 — Full Release
 - Visual draggable curve editor (Bezier control points)
 - Per-app scroll profiles
 - Import/export settings

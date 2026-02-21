@@ -6,11 +6,11 @@
 2026-02-20
 
 ## Current Phase
-v0.8 — All phases implemented, settings streamlined, modifier hotkeys added
+v1.0 — Initial release, all features implemented
 
 ## What Was Decided
 - Build from scratch in pure Swift/SwiftUI (not fork MMF)
-- v0.8/v1.0 versioning split
+- v1.0/v2.0 versioning split
 - MMF presets: Slow/Medium/Fast speed + Low/Regular/High smoothness
 - Both preset groups have Custom state when slider diverges
 - Base Speed slider always visible below speed presets
@@ -28,7 +28,7 @@ v0.8 — All phases implemented, settings streamlined, modifier hotkeys added
 - Enable/disable toggle uses custom Binding (not onChange)
 
 ## Current Status
-- All v0.8 phases complete and functional
+- All v1.0 features complete and functional
 - Scroll engine working with MMF-matched physics
 - Settings UI: enable toggle, speed presets + slider, smoothness presets + slider, modifier hotkeys
 - Live preview panel operational
@@ -39,7 +39,7 @@ v0.8 — All phases implemented, settings streamlined, modifier hotkeys added
 - [ ] Further tune scroll feel to match MMF more closely
 - [ ] Improve live preview to show momentum/inertia
 - [ ] Signed .app / .dmg distribution
-- [ ] v1.0 features: curve editor, per-app profiles
+- [ ] v2.0 features: curve editor, per-app profiles
 
 ## Open Questions
 None

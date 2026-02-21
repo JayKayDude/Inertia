@@ -1,6 +1,6 @@
 # Inertia — Development Roadmap
 
-## v0.8 — Working App (Complete)
+## v1.0 — Initial Release (Complete)
 
 Scroll engine, menubar, settings window with sliders, presets, live preview.
 
@@ -70,7 +70,7 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 
 ---
 
-## v1.0 — Full Release
+## v2.0 — Full Release
 
 ### Visual Curve Editor
 - [ ] "Custom" preset reveals graph view
@@ -82,6 +82,6 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 ### Other
 - [ ] Per-app scroll profiles
 - [ ] Import/export settings
-- [x] ~~App icon design~~ (done in v0.8)
+- [x] ~~App icon design~~ (done in v1.0)
 - [ ] Signed .app / .dmg distribution
 - [ ] Homebrew tap

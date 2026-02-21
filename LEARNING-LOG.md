@@ -43,7 +43,7 @@
 **Symptom:** Lowering Curve Steepness to 0.5 made the curve STEEPER, not flatter
 **Root Cause:** The `a` coefficient = `(p-1)/(b^c - 1)`. At c=0.5, denominator is tiny (0.0488), so a=6.76 — hugely amplifying the curve.
 **Solution:** Left MMF formula as-is (it works well at default c=1.5). User can adjust but extreme low values have this known behavior.
-**Prevention:** Document the valid range. Consider alternative curve formulations for v1.0 curve editor.
+**Prevention:** Document the valid range. Consider alternative curve formulations for v2.0 curve editor.
 
 ### 2026-02-20 — DispatchQueue.sync caused deadlocks
 **Symptom:** App would hang/freeze when scrolling
