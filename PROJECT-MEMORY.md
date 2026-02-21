@@ -30,7 +30,7 @@
 | 2026-02-19 | **Build from scratch, not fork MMF** | MMF is Obj-C with deep dependencies; clean Swift rewrite is simpler | Active |
 | 2026-02-19 | **v0.8/v1.0 versioning** | v0.8 = working app, v1.0 = curve editor + per-app profiles | Active |
 | 2026-02-19 | **Smoothness presets: Low/Regular/High** | ~~Off/Low/Regular/High~~ — Off removed since smooth scrolling is the app's purpose | Active |
-| 2026-02-19 | Base Speed slider always visible, Advanced expandable | Most users only need one slider | Active |
+| 2026-02-19 | Base Speed slider always visible | Most users only need one slider | Active |
 | 2026-02-19 | Preset ↔ slider sync with "Custom" label | Selecting preset moves slider; dragging away shows Custom | Active |
 | 2026-02-20 | **MMF event construction**: CGEvent(source: nil), field 55=22, three delta fields | Terminal and other apps read different delta fields; must set all three consistently | Active |
 | 2026-02-20 | **Direction-only rawDelta** | MMF ignores rawDelta magnitude, only uses sign; prevents per-app scroll speed inconsistency | Active |
@@ -43,13 +43,21 @@
 | 2026-02-20 | **Removed minTickSize** | Was in config/UI but never used by engine; dead code removed | Active |
 | 2026-02-20 | **Tick rate smoothing (rolling avg of 3)** | Matches MMF's RollingAverage(capacity: 3) for stable speed curve input | Active |
 | 2026-02-20 | **velocityThreshold = 120** | Stops animation when <1 px/frame; old value (3.0) ran animation far too long | Active |
+| 2026-02-20 | **Modifier hotkeys** | Customizable fast/slow modifier keys (Control/Option default) with multiplier sliders; uses CGEventSource.flagsState not event.flags | Active |
+| 2026-02-20 | **Enable toggle in settings** | Custom Binding pattern (same as menubar) starts/stops ScrollEngine; syncs via shared config | Active |
+| 2026-02-20 | **Removed curveExponent setting** | Effect was imperceptible — formula self-cancels at different c values; hardcoded to 1.5 | Active |
+| 2026-02-20 | **Removed smoothness slider** | Effect was imperceptible due to compensation factor; momentum duration is the meaningful control | Active |
+| 2026-02-20 | **Renamed momentum duration to "Smoothness" in UI** | User-facing label; internally still momentumDuration | Active |
+| 2026-02-20 | **Capped momentum duration at 0.5** | Range 0.0–0.5 (was 0.0–2.0); values above 0.5 felt uncontrollable | Active |
+| 2026-02-20 | **SmoothnessPreset includes Custom** | Matches SpeedPreset pattern; deselects when either smoothness or momentumDuration diverges from preset values | Active |
 
 ## Versioning
 
 ### v0.8 — Working App (implemented)
 - Scroll engine (CGEventTap + DispatchSourceTimer + MMF physics)
 - Menubar with enable toggle
-- Settings window with presets, sliders, live preview
+- Settings window: enable toggle, speed/smoothness presets with sliders, modifier hotkeys, live preview
+- Modifier hotkeys for fast/slow scrolling (customizable keys and multipliers)
 - Accessibility permission prompt
 - Thread-safe animation with NSLock
 
@@ -77,7 +85,7 @@
 
 ### Speed Curve
 ```
-b = 1.1, c = curveExponent, t = 8.0, p = 1.33
+b = 1.1, c = 1.5 (hardcoded), t = 8.0, p = 1.33
 a = (p - 1) / (b^c - 1)
 multiplier = a * pow(b, (x - t) * c) + 1 - a
 clamped to [1.0, 3.0]

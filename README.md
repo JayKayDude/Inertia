@@ -10,9 +10,11 @@ Inertia replaces the stepped, clunky feel of mouse wheel scrolling on macOS with
 
 - **Smooth inertial scrolling** — physics-based momentum that coasts naturally after each wheel tick
 - **Speed presets** — Slow, Medium, Fast (plus Custom)
-- **Smoothness presets** — Low, Regular, High
+- **Smoothness presets** — Low, Regular, High (controls smoothness and momentum duration)
 - **Base Speed slider** — always visible, fine-grained control
-- **Advanced controls** — Curve Steepness, Momentum Duration
+- **Smoothness slider** — fine-tune momentum duration below presets
+- **Modifier hotkeys** — hold a modifier key while scrolling for fast (default: Control, 2x) or slow (default: Option, 0.5x) scrolling, with customizable keys and multipliers
+- **Enable/disable toggle** — in both the menubar and settings window
 - **Live preview** — test your settings inside the app
 - **Custom menubar icon** — template icon adapts to light/dark mode
 - **Lightweight menubar app** — no Dock icon, runs silently in the background

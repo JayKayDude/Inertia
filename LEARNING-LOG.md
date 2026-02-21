@@ -57,6 +57,24 @@
 **Solution:** Replace `$config.enabled` + `.onChange` with a custom `Binding(get:set:)` that calls `engine.start()`/`engine.stop()` directly in the setter.
 **Prevention:** Never rely on `.onChange` for `@AppStorage` properties on ObservableObject classes. Use custom Bindings or move `@AppStorage` into the View struct.
 
+### 2026-02-20 — HID scroll events don't carry modifier key flags
+**Symptom:** Modifier hotkeys (Control for fast scroll, Option for slow) had no effect when held during scrolling
+**Root Cause:** Scroll wheel events intercepted at `kCGHIDEventTap` don't have keyboard modifier flags populated in `event.flags`
+**Solution:** Use `CGEventSource.flagsState(.combinedSessionState)` to query the system-wide modifier key state instead of reading `event.flags`
+**Prevention:** Always use `CGEventSource.flagsState(.combinedSessionState)` for modifier key detection in CGEventTap callbacks, not the event's own flags property
+
+### 2026-02-20 — Curve steepness slider had no perceptible effect
+**Symptom:** Changing the Curve Steepness slider (curveExponent) didn't visibly change scroll behavior
+**Root Cause:** The `a` coefficient in the speed curve formula recalibrates when `c` changes, so the curve always passes through (t+1, 1.33) regardless of `c`. The 3x cap also kicks in quickly at all values.
+**Solution:** Removed the setting entirely; hardcoded c=1.5
+**Prevention:** Test settings across their full range to verify perceptible effect before exposing them in UI
+
+### 2026-02-20 — Smoothness slider had no perceptible effect
+**Symptom:** Changing the smoothness value didn't visibly change scroll feel
+**Root Cause:** The compensation factor (`(1 - smoothness) / (1 - 0.9)`) scales the impulse inversely to smoothness, keeping total scroll distance constant. At typical mouse tick rates (5–20Hz), the blending difference between ticks is too subtle to perceive.
+**Solution:** Removed the smoothness slider from UI; momentum duration is the meaningful control for perceived smoothness
+**Prevention:** When two settings are coupled by a compensation formula, verify that the perceptual difference is actually noticeable
+
 ### 2026-02-20 — Git repo root was home directory
 **Symptom:** `git status` showed thousands of untracked files from entire home directory. Commit included VEX Pathfinder files.
 **Root Cause:** `.git` folder was at `/Users/jaykecollier/` (leftover from another project), not inside the Inertia folder.

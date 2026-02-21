@@ -14,13 +14,13 @@
 ## Tech Stack
 - **UI:** SwiftUI (`MenuBarExtra`, settings window)
 - **Scroll interception:** `CGEventTap` at `kCGHIDEventTap`
-- **Display sync:** `CVDisplayLink` for smooth momentum animation
+- **Animation:** `DispatchSourceTimer` at 120Hz for smooth momentum animation
 - **Persistence:** `@AppStorage` / `UserDefaults`
 - **Mouse vs trackpad:** `kCGScrollWheelEventIsContinuous` (0 = mouse, 1 = trackpad passthrough)
 
 ## MMF Reference
 - Physics formulas adapted from Mac Mouse Fix by Noah Nuebling
-- Speedup curve: `y = a * pow(b, (x-t) * c) + 1 - a`
+- Speedup curve: `y = a * pow(1.1, (x-t) * 1.5) + 1 - a` (c hardcoded to 1.5)
 - Inertia is a derivative work with substantial changes (new UI, rewritten engine, free/open source)
 - Must attribute MMF prominently in UI and README
 

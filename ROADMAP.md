@@ -24,17 +24,20 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 
 ### Phase 3 — Configuration & Presets
 - [x] `ScrollConfig.swift` — @AppStorage backed
-- [x] Parameters: baseSpeed, curveExponent, momentumDuration, smoothness
+- [x] Parameters: baseSpeed, momentumDuration, smoothness
 - [x] Speed presets: Slow / Medium / Fast
-- [x] Smoothness presets: Low / Regular / High
+- [x] Smoothness presets: Low / Regular / High (controls both smoothness and momentum duration)
 - [x] Preset ↔ slider sync (selecting preset moves slider, dragging slider shows "Custom")
+- [x] Modifier hotkeys: customizable fast/slow modifier keys with configurable multipliers
 
 ### Phase 4 — Settings Window
 - [x] `SettingsView.swift` — single-window SwiftUI
+- [x] Enable/disable toggle at top (syncs with menubar toggle)
 - [x] Preset buttons (speed + smoothness)
 - [x] Base Speed slider always visible
+- [x] Smoothness slider (momentum duration) below smoothness presets
 - [x] "Custom" label when slider != preset
-- [x] Expandable Advanced section (Curve Steepness, Momentum Duration)
+- [x] Modifier hotkeys section with toggle, key pickers, and multiplier sliders
 - [x] Reset to Defaults button in footer
 
 ### Phase 5 — Live Preview Panel
@@ -61,6 +64,9 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Remove dead minTickSize code
 - [x] Fix lineDelta consistency (use rounded pixels, not raw)
 - [x] Fix timer/frameInterval mismatch
+- [x] Remove curve steepness setting (imperceptible effect)
+- [x] Remove smoothness slider (imperceptible effect, momentum duration is the meaningful control)
+- [x] Cap momentum duration range to 0.0–0.5
 
 ---
 
