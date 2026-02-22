@@ -65,7 +65,7 @@ This matters because a scroll utility needs to be always-on and completely out o
 ### Download
 Download the latest `.app` from [Releases](https://github.com/JayKayDude/Inertia/releases).
 
-> **Note:** Inertia is not notarized (no Apple Developer account). On first launch, right-click the app and select **Open**, then click **Open** in the dialog. This is only needed once.
+> **Note:** Inertia is not currently signed or notarized. On first launch, right-click the app and select **Open**, then click **Open** in the dialog. This is only needed once. Signed distribution may be added in the future.
 
 ### Build from Source
 1. Clone this repo
@@ -93,9 +93,14 @@ The engine constructs scroll events that match macOS's native continuous scroll 
 
 ## Planned for v2.0
 
-- Visual draggable curve editor
-- Per-app scroll profiles
-- Import/export settings
+- Per-app blacklist (disable smooth scrolling for specific apps)
+- Launch at login
+- Horizontal scroll smoothing (Shift+scroll)
+- Scroll distance multiplier
+- Reverse scroll direction per-axis (independent from trackpad)
+- Global keyboard shortcut to toggle Inertia
+- Scroll acceleration toggle (disable speed curve for linear scrolling)
+- Per-app scroll profiles (different speed/smoothness per app)
 
 ---
 

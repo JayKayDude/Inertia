@@ -72,16 +72,39 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 
 ## v2.0 — Full Release
 
-### Visual Curve Editor
-- [ ] "Custom" preset reveals graph view
-- [ ] X: scroll velocity, Y: speed multiplier
-- [ ] Draggable Bezier control points
-- [ ] Real-time preview updates
-- [ ] Save custom curves as named presets
+### App Blacklist
+- [ ] Per-app blacklist — select apps where smooth scrolling is disabled
+- [ ] UI in settings to add/remove apps (app picker or running apps list)
+- [ ] ScrollEngine checks frontmost app against blacklist and passes events through unmodified
+- [ ] Blacklist persisted via @AppStorage or UserDefaults
 
-### Other
-- [ ] Per-app scroll profiles
-- [ ] Import/export settings
+### Launch at Login
+- [ ] Option to auto-start Inertia on boot
+- [ ] Toggle in settings window
+- [ ] Use SMAppService (macOS 13+) or LoginItem API
+
+### Horizontal Scroll Smoothing
+- [ ] Apply smooth scrolling when Shift is held (Shift+scroll = horizontal, macOS default)
+- [ ] Use same speed/smoothness settings as vertical
+- [ ] Remove Shift from ModifierKey enum (conflicts with horizontal scroll)
+
+### Scroll Distance Multiplier
+- [ ] Simple "scroll more/less per tick" setting without changing the feel
+- [ ] Slider in settings
+
+### Reverse Scroll Direction
+- [ ] Toggle to reverse vertical scroll direction (independent from trackpad)
+- [ ] Toggle to reverse horizontal scroll direction
+- [ ] Settings UI with per-axis toggles
+
+### Global Toggle Hotkey
+- [ ] Customizable keyboard shortcut to enable/disable Inertia without opening menubar
+
+### Scroll Acceleration Toggle
+- [ ] Option to disable the speed curve entirely (linear scrolling)
+- [ ] Every tick scrolls the same amount regardless of scroll speed
+- [ ] Toggle in settings
+
+### Per-App Scroll Profiles
+- [ ] Different speed/smoothness settings per app (not just on/off)
 - [x] ~~App icon design~~ (done in v1.0)
-- [ ] Signed .app / .dmg distribution
-- [ ] Homebrew tap
