@@ -109,7 +109,7 @@ App icon created by [Freepik — Flaticon](https://www.flaticon.com/free-icons/i
 
 ## License
 
-MIT License — free to use, modify, and distribute. See [LICENSE](LICENSE) for details.
+Inertia License (based on the [MMF License](https://github.com/noah-nuebling/mac-mouse-fix/blob/master/License)) — free to use and modify. Derivative works must attribute Inertia and may not be sold unless they represent substantial independent work. See [LICENSE](LICENSE) for details.
 
 ---
 
