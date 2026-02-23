@@ -272,6 +272,7 @@ struct HotkeyRecorderView: View {
                     .font(.caption)
             }
         }
+        .onDisappear { stopRecording() }
     }
 
     private func toggleRecording() {

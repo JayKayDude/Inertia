@@ -51,7 +51,7 @@ class ScrollEngine: ObservableObject {
 
     private static let frameInterval: Double = 1.0 / 120.0
     private static let pixelsPerTick: Double = 45.0
-    private static let velocityThreshold: Double = 120.0
+    private static let velocityThreshold: Double = 30.0
     private static let pixelsPerLine: Double = 10.0
     private static let referenceSmoothness: Double = 0.9
 
@@ -195,9 +195,6 @@ class ScrollEngine: ObservableObject {
 
         lock.lock()
         if isHorizontal != scrollAxisIsHorizontal {
-            NSLog("[Inertia] AXIS SWITCH: %@ → %@, vel=%.1f, animating=%d",
-                  scrollAxisIsHorizontal ? "H" : "V", isHorizontal ? "H" : "V",
-                  velocity, animating ? 1 : 0)
             velocity = 0
             subPixelAccumulator = 0
             lineSubPixelAccumulator = 0
@@ -212,9 +209,6 @@ class ScrollEngine: ObservableObject {
         velocity = velocity * effectiveSmoothness + impulse * compensation
         let maxVelocity = cachedBaseSpeed * 3.0 * ScrollEngine.pixelsPerTick * 4.0 * fast
         velocity = min(max(velocity, -maxVelocity), maxVelocity)
-
-        NSLog("[Inertia] TICK: axis=%@ dir=%.0f vel=%.1f impulse=%.1f animating=%d",
-              isHorizontal ? "H" : "V", direction, velocity, impulse, animating ? 1 : 0)
 
         lock.unlock()
 
@@ -361,9 +355,6 @@ class ScrollEngine: ObservableObject {
 
         if intPixels == 0 { return }
 
-        NSLog("[Inertia] POST: axis=%@ px=%lld line=%lld vel=%.1f",
-              isH ? "H" : "V", intPixels, lineInt, delta / ScrollEngine.frameInterval)
-
         guard let event = CGEvent(source: nil) else { return }
         event.setIntegerValueField(CGEventField(rawValue: 55)!, value: 22)
         event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
@@ -394,7 +385,7 @@ private func scrollCallback(
     event: CGEvent,
     userInfo: UnsafeMutableRawPointer?
 ) -> Unmanaged<CGEvent>? {
-    guard let userInfo = userInfo else { return Unmanaged.passRetained(event) }
+    guard let userInfo = userInfo else { return Unmanaged.passUnretained(event) }
     let engine = Unmanaged<ScrollEngine>.fromOpaque(userInfo).takeUnretainedValue()
 
     if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
@@ -402,10 +393,10 @@ private func scrollCallback(
         if engine.isRunning, let tap = engine.eventTap {
             CGEvent.tapEnable(tap: tap, enable: true)
         }
-        return Unmanaged.passRetained(event)
+        return Unmanaged.passUnretained(event)
     }
 
-    guard type == .scrollWheel else { return Unmanaged.passRetained(event) }
+    guard type == .scrollWheel else { return Unmanaged.passUnretained(event) }
 
     if let processed = engine.handleScrollEvent(event) {
         return Unmanaged.passRetained(processed)

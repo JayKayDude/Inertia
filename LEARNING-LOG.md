@@ -75,6 +75,24 @@
 **Solution:** Removed the smoothness slider from UI; momentum duration is the meaningful control for perceived smoothness
 **Prevention:** When two settings are coupled by a compensation formula, verify that the perceptual difference is actually noticeable
 
+### 2026-02-23 — Horizontal scroll axis switching requires no scroll phases
+**Symptom:** Switching between horizontal and vertical scrolling caused pauses, especially on websites with separate H/V scroll containers and on overscroll rubber-band.
+**Root Cause:** Multiple failed approaches: (1) dual-axis combined events don't work — apps can't handle both axis1 and axis2 non-zero in continuous events. (2) Scroll phases (began/changed/ended) per axis caused gesture lifecycle conflicts — ending one gesture and beginning another triggered browser scroll latching issues. (3) Sharing a gesture lifecycle across axes worked for most cases but rubber-band overscroll stayed tied to the gesture.
+**Solution:** Match MMF's continuous scroll mode exactly — `isContinuous=1` + field 55=22 + single-axis deltas, NO scroll phase fields (99/123). Each event is independent with no gesture lifecycle. On axis switch, just zero velocity and continue.
+**Prevention:** For macOS scroll event posting, prefer the simplest approach that works. Scroll phases add complexity and create app-specific behavior differences. Only add phases if specifically needed for a feature (e.g., overscroll bounce).
+
+### 2026-02-23 — CGEventTap callback must use passUnretained for original events
+**Symptom:** Memory leak proportional to scroll event volume
+**Root Cause:** `Unmanaged.passRetained(event)` increments retain count on the system-owned event. System releases once after processing, but the extra retain is never balanced — leaked every passthrough event.
+**Solution:** Use `Unmanaged.passUnretained(event)` for returning the original event. System already owns it.
+**Prevention:** In CGEventTap callbacks, always use `passUnretained` when returning the original event. Only use `passRetained` for newly created events where you're transferring ownership.
+
+### 2026-02-23 — Carbon hotkey callback fires for ALL hotkeys, not just yours
+**Symptom:** (Potential) Hotkey callback could toggle Inertia when another app's global hotkey fires
+**Root Cause:** `kEventHotKeyPressed` handler receives ALL hotkey events. Must extract and verify `EventHotKeyID` via `GetEventParameter` to confirm it matches your registered signature/id.
+**Solution:** Added `GetEventParameter` with `kEventParamDirectObject` / `typeEventHotKeyID` check, returning `eventNotHandledErr` for non-matching hotkeys.
+**Prevention:** Always verify hotkey identity in Carbon event handlers. Use a unique 4-char signature (e.g., 0x494E5254 = "INRT").
+
 ### 2026-02-20 — Git repo root was home directory
 **Symptom:** `git status` showed thousands of untracked files from entire home directory. Commit included VEX Pathfinder files.
 **Root Cause:** `.git` folder was at `/Users/jaykecollier/` (leftover from another project), not inside the Inertia folder.

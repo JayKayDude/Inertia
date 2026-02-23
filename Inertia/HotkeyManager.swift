@@ -105,6 +105,22 @@ private func hotkeyCallback(
     _ event: EventRef?,
     _ userData: UnsafeMutableRawPointer?
 ) -> OSStatus {
+    guard let event = event else { return OSStatus(eventNotHandledErr) }
+    var hotKeyID = EventHotKeyID()
+    let status = GetEventParameter(
+        event,
+        EventParamName(kEventParamDirectObject),
+        EventParamType(typeEventHotKeyID),
+        nil,
+        MemoryLayout<EventHotKeyID>.size,
+        nil,
+        &hotKeyID
+    )
+    guard status == noErr,
+          hotKeyID.signature == OSType(0x494E5254),
+          hotKeyID.id == 1
+    else { return OSStatus(eventNotHandledErr) }
+
     DispatchQueue.main.async {
         let config = ScrollConfig.shared
         config.enabled.toggle()

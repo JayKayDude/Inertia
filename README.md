@@ -40,6 +40,9 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 - **Modifier hotkeys** — hold Control to scroll faster (2x) or Option to scroll slower (0.5x), fully customizable
 - **Enable/disable toggle** — in both the menubar and settings window
 - **Live preview** — test your settings inside the app before using them system-wide
+- **Smooth horizontal scrolling** — hold Shift to scroll horizontally with the same smooth momentum
+- **Launch at login** — optionally start Inertia automatically on boot
+- **Global toggle hotkey** — customizable keyboard shortcut to enable/disable Inertia from anywhere
 - **Lightweight** — menubar-only app, no Dock icon, runs silently in the background
 - **Mouse-only** — trackpad scrolling is left completely untouched
 - **Works everywhere** — consistent scroll feel across all apps including Terminal
@@ -94,11 +97,8 @@ The engine constructs scroll events that match macOS's native continuous scroll 
 ## Planned for v2.0
 
 - Per-app blacklist (disable smooth scrolling for specific apps)
-- Launch at login
-- Horizontal scroll smoothing (Shift+scroll)
 - Scroll distance multiplier
 - Reverse scroll direction per-axis (independent from trackpad)
-- Global keyboard shortcut to toggle Inertia
 - Scroll acceleration toggle (disable speed curve for linear scrolling)
 - Per-app scroll profiles (different speed/smoothness per app)
 

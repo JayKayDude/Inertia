@@ -79,14 +79,14 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [ ] Blacklist persisted via @AppStorage or UserDefaults
 
 ### Launch at Login
-- [ ] Option to auto-start Inertia on boot
-- [ ] Toggle in settings window
-- [ ] Use SMAppService (macOS 13+) or LoginItem API
+- [x] Option to auto-start Inertia on boot
+- [x] Toggle in settings window
+- [x] Use SMAppService (macOS 13+)
 
 ### Horizontal Scroll Smoothing
-- [ ] Apply smooth scrolling when Shift is held (Shift+scroll = horizontal, macOS default)
-- [ ] Use same speed/smoothness settings as vertical
-- [ ] Remove Shift from ModifierKey enum (conflicts with horizontal scroll)
+- [x] Apply smooth scrolling when Shift is held (Shift+scroll = horizontal, macOS default)
+- [x] Use same speed/smoothness settings as vertical
+- [x] Remove Shift from ModifierKey enum (conflicts with horizontal scroll)
 
 ### Scroll Distance Multiplier
 - [ ] Simple "scroll more/less per tick" setting without changing the feel
@@ -98,7 +98,9 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [ ] Settings UI with per-axis toggles
 
 ### Global Toggle Hotkey
-- [ ] Customizable keyboard shortcut to enable/disable Inertia without opening menubar
+- [x] Customizable keyboard shortcut to enable/disable Inertia without opening menubar
+- [x] Custom key recorder UI in settings
+- [x] Carbon RegisterEventHotKey with hotkey ID verification
 
 ### Scroll Acceleration Toggle
 - [ ] Option to disable the speed curve entirely (linear scrolling)

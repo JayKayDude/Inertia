@@ -50,6 +50,13 @@
 | 2026-02-20 | **Renamed momentum duration to "Smoothness" in UI** | User-facing label; internally still momentumDuration | Active |
 | 2026-02-20 | **Capped momentum duration at 0.5** | Range 0.0–0.5 (was 0.0–2.0); values above 0.5 felt uncontrollable | Active |
 | 2026-02-20 | **SmoothnessPreset includes Custom** | Matches SpeedPreset pattern; deselects when either smoothness or momentumDuration diverges from preset values | Active |
+| 2026-02-23 | **Horizontal scroll: single-axis, no phases** | Single-axis events matching MMF continuous mode. No scroll phase fields (99/123). Shared gesture lifecycle across axes (no ended/began on axis switch). | Active |
+| 2026-02-23 | **Shift removed from ModifierKey** | Shift+scroll = horizontal scroll (macOS default). Conflicts with modifier hotkey usage. | Active |
+| 2026-02-23 | **Carbon RegisterEventHotKey for global hotkey** | No permissions needed for non-sandboxed apps. Callback verifies hotkey ID via GetEventParameter. | Active |
+| 2026-02-23 | **SMAppService for launch at login** | Reads system status directly (no local @AppStorage). Users can remove login items from System Settings independently. | Active |
+| 2026-02-23 | **velocityThreshold lowered to 30.0** | Was 120.0 (1 px/frame). At 30.0, slow single-tick scrolls get visible momentum (~360ms vs ~83ms). | Active |
+| 2026-02-23 | **Fast scroll acceleration resets on direction/axis change** | consecutiveSwipeCount zeroed on direction reversal and axis switch to prevent carryover. | Active |
+| 2026-02-23 | **CGEventTap callback uses passUnretained** | passRetained leaked every passthrough event. passUnretained is correct since system already owns the event. | Active |
 
 ## Versioning
 
@@ -61,11 +68,16 @@
 - Accessibility permission prompt
 - Thread-safe animation with NSLock
 
-### v2.0 — Full Release
-- Visual draggable curve editor (Bezier control points)
+### v2.0 — Full Release (in progress)
+- ~~Launch at login~~ (done)
+- ~~Horizontal scroll smoothing~~ (done)
+- ~~Global toggle hotkey~~ (done)
+- App blacklist (per-app disable)
+- Scroll distance multiplier
+- Reverse scroll direction per-axis
+- Scroll acceleration toggle
 - Per-app scroll profiles
-- Import/export settings
-- ~~App icon~~ (done), signed distribution, Homebrew tap
+- Signed distribution
 
 ## Scroll Engine Technical Details
 
@@ -81,7 +93,7 @@
 - `pixelsPerTick` = 45.0
 - `pixelsPerLine` = 10.0
 - `frameInterval` = 1/120
-- `velocityThreshold` = 120.0
+- `velocityThreshold` = 30.0
 
 ### Speed Curve
 ```
@@ -119,6 +131,7 @@ clamped to [1.0, 3.0]
 | `Inertia/AccessibilityManager.swift` | Permission check & prompt |
 | `Inertia/SettingsView.swift` | Main settings window |
 | `Inertia/LivePreviewView.swift` | Scrollable preview panel |
+| `Inertia/HotkeyManager.swift` | Carbon global hotkey registration and callback |
 | `Inertia/CreditsView.swift` | Credits window (MMF, Freepik attribution) |
 | `CLAUDE.md` | Standing instructions for Claude Code |
 | `SESSION-STATE.md` | Per-session progress tracker |
