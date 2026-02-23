@@ -2,7 +2,6 @@ import SwiftUI
 import CoreGraphics
 
 enum ModifierKey: String, CaseIterable, Identifiable {
-    case shift = "shift"
     case control = "control"
     case option = "option"
     case command = "command"
@@ -11,7 +10,6 @@ enum ModifierKey: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .shift: return "Shift"
         case .control: return "Control"
         case .option: return "Option"
         case .command: return "Command"
@@ -20,7 +18,6 @@ enum ModifierKey: String, CaseIterable, Identifiable {
 
     var flags: CGEventFlags {
         switch self {
-        case .shift: return .maskShift
         case .control: return .maskControl
         case .option: return .maskAlternate
         case .command: return .maskCommand
@@ -86,6 +83,12 @@ class ScrollConfig: ObservableObject {
     @AppStorage("slowModifier") var slowModifier = "option"
     @AppStorage("fastMultiplier") var fastMultiplier = 2.0
     @AppStorage("slowMultiplier") var slowMultiplier = 0.5
+
+    @AppStorage("horizontalScrollEnabled") var horizontalScrollEnabled = true
+
+    @AppStorage("globalHotkeyEnabled") var globalHotkeyEnabled = false
+    @AppStorage("globalHotkeyKeyCode") var globalHotkeyKeyCode = 34
+    @AppStorage("globalHotkeyModifiers") var globalHotkeyModifiers = 768
 
     static let fastMultiplierRange = 1.5...5.0
     static let slowMultiplierRange = 0.1...0.8
@@ -159,6 +162,10 @@ class ScrollConfig: ObservableObject {
         slowModifier = "option"
         fastMultiplier = 2.0
         slowMultiplier = 0.5
+        horizontalScrollEnabled = true
+        globalHotkeyEnabled = false
+        globalHotkeyKeyCode = 34
+        globalHotkeyModifiers = 768
     }
 
     private func syncPresetsFromValues() {

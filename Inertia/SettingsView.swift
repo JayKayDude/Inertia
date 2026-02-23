@@ -1,4 +1,5 @@
 import SwiftUI
+import ServiceManagement
 
 struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
@@ -13,11 +14,14 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 enableToggle
+                launchAtLoginToggle
                 presetSection
                 speedSliderSection
                 smoothnessSection
                 momentumDurationSliderSection
                 hotkeysSection
+                horizontalScrollToggle
+                globalHotkeySection
             }
             .padding()
 
@@ -193,10 +197,119 @@ struct SettingsView: View {
         }
     }
 
+    private var launchAtLoginToggle: some View {
+        Toggle("Launch at Login", isOn: Binding(
+            get: { SMAppService.mainApp.status == .enabled },
+            set: { newValue in
+                do {
+                    if newValue {
+                        try SMAppService.mainApp.register()
+                    } else {
+                        try SMAppService.mainApp.unregister()
+                    }
+                } catch {
+                    NSLog("[Inertia] Launch at login error: \(error)")
+                }
+            }
+        ))
+    }
+
+    private var horizontalScrollToggle: some View {
+        Toggle("Smooth Horizontal Scrolling", isOn: $config.horizontalScrollEnabled)
+    }
+
+    private var globalHotkeySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle("Global Toggle Hotkey", isOn: Binding(
+                get: { config.globalHotkeyEnabled },
+                set: { newValue in
+                    config.globalHotkeyEnabled = newValue
+                    HotkeyManager.shared.updateHotkey()
+                }
+            ))
+            .font(.headline)
+
+            if config.globalHotkeyEnabled {
+                HotkeyRecorderView(
+                    keyCode: $config.globalHotkeyKeyCode,
+                    modifiers: $config.globalHotkeyModifiers
+                )
+                .padding(.leading, 4)
+            }
+        }
+    }
+
     private var footerSection: some View {
         Button("Reset to Defaults") {
             config.resetToDefaults()
+            HotkeyManager.shared.updateHotkey()
         }
         .frame(maxWidth: .infinity, alignment: .center)
+    }
+}
+
+struct HotkeyRecorderView: View {
+    @Binding var keyCode: Int
+    @Binding var modifiers: Int
+    @State private var recording = false
+    @State private var monitor: Any?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Button(action: { toggleRecording() }) {
+                Text(recording ? "Press keys..." : HotkeyManager.displayString(keyCode: keyCode, modifiers: modifiers))
+                    .frame(minWidth: 100)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(.bordered)
+            .tint(recording ? .red : nil)
+
+            if recording {
+                Button("Cancel") { stopRecording() }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            }
+        }
+    }
+
+    private func toggleRecording() {
+        if recording {
+            stopRecording()
+        } else {
+            startRecording()
+        }
+    }
+
+    private func startRecording() {
+        recording = true
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            let carbonMods = HotkeyManager.carbonModifiers(from: flags)
+
+            if event.keyCode == 53 {
+                stopRecording()
+                return nil
+            }
+
+            if carbonMods == 0 {
+                return nil
+            }
+
+            keyCode = Int(event.keyCode)
+            modifiers = carbonMods
+            stopRecording()
+            HotkeyManager.shared.updateHotkey()
+            return nil
+        }
+    }
+
+    private func stopRecording() {
+        recording = false
+        if let monitor = monitor {
+            NSEvent.removeMonitor(monitor)
+        }
+        monitor = nil
     }
 }

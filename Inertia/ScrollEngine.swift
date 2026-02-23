@@ -2,7 +2,6 @@ import Foundation
 import CoreGraphics
 import ApplicationServices
 import AppKit
-import os.lock
 
 class ScrollEngine: ObservableObject {
     static let shared = ScrollEngine()
@@ -14,11 +13,14 @@ class ScrollEngine: ObservableObject {
     private var animationTimer: DispatchSourceTimer?
 
     private var velocity: Double = 0
+    private var scrollAxisIsHorizontal = false
     private var lastTickTime: CFAbsoluteTime = 0
     private var tickRate: Double = 0
     private var animating = false
     private var subPixelAccumulator: Double = 0
     private var lineSubPixelAccumulator: Double = 0
+    private var subPixelAccumulatorX: Double = 0
+    private var lineSubPixelAccumulatorX: Double = 0
     private var scrollOriginWindow: Int = 0
 
     private var cachedFriction: Double = 0.96
@@ -102,7 +104,22 @@ class ScrollEngine: ObservableObject {
         let isContinuous = event.getIntegerValueField(.scrollWheelEventIsContinuous)
         if isContinuous == 1 { return event }
 
-        let rawDelta = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
+        let rawDeltaY = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
+        let rawDeltaX = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2)
+        let flags = CGEventSource.flagsState(.combinedSessionState)
+        let shiftHeld = flags.contains(.maskShift)
+
+        let nativeHorizontal = abs(rawDeltaX) > 0.001 && abs(rawDeltaY) < 0.001
+        let isHorizontal = shiftHeld || nativeHorizontal
+
+        let rawDelta: Double
+        if isHorizontal {
+            if !config.horizontalScrollEnabled { return event }
+            rawDelta = nativeHorizontal ? rawDeltaX : rawDeltaY
+        } else {
+            rawDelta = rawDeltaY
+        }
+
         if abs(rawDelta) < 0.001 { return event }
 
         scrollOriginWindow = windowUnderCursor()
@@ -139,7 +156,9 @@ class ScrollEngine: ObservableObject {
         let direction: Double = rawDelta > 0 ? 1.0 : -1.0
 
         if dt > 0.16 || direction != lastDirection {
-            if consecutiveTickCount >= ScrollEngine.swipeMinTicks
+            if direction != lastDirection {
+                consecutiveSwipeCount = 0
+            } else if consecutiveTickCount >= ScrollEngine.swipeMinTicks
                 && dt <= ScrollEngine.swipeMaxInterval {
                 let elapsed = now - swipeSequenceStartTime
                 let avgTickSpeed = elapsed > 0 ? Double(swipeSequenceTickCount) / elapsed : 0
@@ -163,8 +182,7 @@ class ScrollEngine: ObservableObject {
         let fast = fastScrollFactor()
         var impulse = direction * speed * ScrollEngine.pixelsPerTick * fast
 
-        if cachedModifierHotkeysEnabled {
-            let flags = CGEventSource.flagsState(.combinedSessionState)
+        if cachedModifierHotkeysEnabled && !isHorizontal {
             if flags.contains(cachedFastModifierFlags) {
                 impulse *= cachedFastMultiplier
             } else if flags.contains(cachedSlowModifierFlags) {
@@ -176,11 +194,28 @@ class ScrollEngine: ObservableObject {
         let compensation = (1.0 - effectiveSmoothness) / (1.0 - ScrollEngine.referenceSmoothness)
 
         lock.lock()
+        if isHorizontal != scrollAxisIsHorizontal {
+            NSLog("[Inertia] AXIS SWITCH: %@ → %@, vel=%.1f, animating=%d",
+                  scrollAxisIsHorizontal ? "H" : "V", isHorizontal ? "H" : "V",
+                  velocity, animating ? 1 : 0)
+            velocity = 0
+            subPixelAccumulator = 0
+            lineSubPixelAccumulator = 0
+            subPixelAccumulatorX = 0
+            lineSubPixelAccumulatorX = 0
+            scrollAxisIsHorizontal = isHorizontal
+            consecutiveSwipeCount = 0
+        }
+
         if direction > 0 && velocity < 0 { velocity = 0 }
         if direction < 0 && velocity > 0 { velocity = 0 }
         velocity = velocity * effectiveSmoothness + impulse * compensation
         let maxVelocity = cachedBaseSpeed * 3.0 * ScrollEngine.pixelsPerTick * 4.0 * fast
         velocity = min(max(velocity, -maxVelocity), maxVelocity)
+
+        NSLog("[Inertia] TICK: axis=%@ dir=%.0f vel=%.1f impulse=%.1f animating=%d",
+              isHorizontal ? "H" : "V", direction, velocity, impulse, animating ? 1 : 0)
+
         lock.unlock()
 
         startAnimationIfNeeded()
@@ -224,44 +259,17 @@ class ScrollEngine: ObservableObject {
         return base * clamped
     }
 
-    private func postScrollEvent(pixelDelta: Double) {
-        let precise = pixelDelta + subPixelAccumulator
-        let rounded = precise.rounded()
-        if rounded == 0 {
-            subPixelAccumulator = precise
-            return
-        }
-        subPixelAccumulator = precise - rounded
-        let intPixels = Int64(rounded)
-
-        let linePrecise = (pixelDelta / ScrollEngine.pixelsPerLine) + lineSubPixelAccumulator
-        let lineRounded = linePrecise.rounded()
-        lineSubPixelAccumulator = linePrecise - lineRounded
-        let lineInt = Int64(lineRounded)
-        let fixedPt = lineInt * 65536
-
-        guard let event = CGEvent(source: nil) else { return }
-
-        event.setIntegerValueField(CGEventField(rawValue: 55)!, value: 22)
-        event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
-
-        event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: lineInt)
-        event.setIntegerValueField(.scrollWheelEventPointDeltaAxis1, value: intPixels)
-        event.setIntegerValueField(.scrollWheelEventFixedPtDeltaAxis1, value: fixedPt)
-
-        event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: 0)
-        event.setIntegerValueField(.scrollWheelEventPointDeltaAxis2, value: 0)
-        event.setIntegerValueField(.scrollWheelEventFixedPtDeltaAxis2, value: 0)
-
-        event.post(tap: .cgSessionEventTap)
-    }
-
     private func startAnimationIfNeeded() {
         lock.lock()
-        guard !animating else { lock.unlock(); return }
+        guard !animating else {
+            lock.unlock()
+            return
+        }
         animating = true
         subPixelAccumulator = 0
         lineSubPixelAccumulator = 0
+        subPixelAccumulatorX = 0
+        lineSubPixelAccumulatorX = 0
         lock.unlock()
 
         animationTimer?.cancel()
@@ -280,6 +288,8 @@ class ScrollEngine: ObservableObject {
         velocity = 0
         subPixelAccumulator = 0
         lineSubPixelAccumulator = 0
+        subPixelAccumulatorX = 0
+        lineSubPixelAccumulatorX = 0
         consecutiveSwipeCount = 0
         consecutiveTickCount = 0
         lock.unlock()
@@ -296,6 +306,8 @@ class ScrollEngine: ObservableObject {
             velocity = 0
             subPixelAccumulator = 0
             lineSubPixelAccumulator = 0
+            subPixelAccumulatorX = 0
+            lineSubPixelAccumulatorX = 0
             lock.unlock()
             animationTimer?.cancel()
             animationTimer = nil
@@ -303,13 +315,43 @@ class ScrollEngine: ObservableObject {
         }
 
         let inMomentum = CFAbsoluteTimeGetCurrent() - lastTickTime > 0.15
+        let originWindow = scrollOriginWindow
+        let isH = scrollAxisIsHorizontal
+        let delta = velocity * ScrollEngine.frameInterval
+
+        let pixelDelta = delta
+        let accum = isH ? subPixelAccumulatorX : subPixelAccumulator
+        let precise = pixelDelta + accum
+        let rounded = precise.rounded()
+        var intPixels: Int64 = 0
+        if rounded == 0 {
+            if isH { subPixelAccumulatorX = precise } else { subPixelAccumulator = precise }
+        } else {
+            if isH { subPixelAccumulatorX = precise - rounded } else { subPixelAccumulator = precise - rounded }
+            intPixels = Int64(rounded)
+        }
+
+        var lineInt: Int64 = 0
+        if intPixels != 0 {
+            let lineAcc = isH ? lineSubPixelAccumulatorX : lineSubPixelAccumulator
+            let linePrecise = (pixelDelta / ScrollEngine.pixelsPerLine) + lineAcc
+            let lineRounded = linePrecise.rounded()
+            if isH { lineSubPixelAccumulatorX = linePrecise - lineRounded } else { lineSubPixelAccumulator = linePrecise - lineRounded }
+            lineInt = Int64(lineRounded)
+        }
+
+        lock.unlock()
+
         if inMomentum {
             let currentWindow = windowUnderCursor()
-            if currentWindow != scrollOriginWindow && currentWindow != 0 {
+            if currentWindow != originWindow && currentWindow != 0 {
+                lock.lock()
                 animating = false
                 velocity = 0
                 subPixelAccumulator = 0
                 lineSubPixelAccumulator = 0
+                subPixelAccumulatorX = 0
+                lineSubPixelAccumulatorX = 0
                 lock.unlock()
                 animationTimer?.cancel()
                 animationTimer = nil
@@ -317,9 +359,32 @@ class ScrollEngine: ObservableObject {
             }
         }
 
-        let pixelDelta = velocity * ScrollEngine.frameInterval
-        lock.unlock()
-        postScrollEvent(pixelDelta: pixelDelta)
+        if intPixels == 0 { return }
+
+        NSLog("[Inertia] POST: axis=%@ px=%lld line=%lld vel=%.1f",
+              isH ? "H" : "V", intPixels, lineInt, delta / ScrollEngine.frameInterval)
+
+        guard let event = CGEvent(source: nil) else { return }
+        event.setIntegerValueField(CGEventField(rawValue: 55)!, value: 22)
+        event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
+
+        if isH {
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: 0)
+            event.setIntegerValueField(.scrollWheelEventPointDeltaAxis1, value: 0)
+            event.setIntegerValueField(.scrollWheelEventFixedPtDeltaAxis1, value: 0)
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: lineInt)
+            event.setIntegerValueField(.scrollWheelEventPointDeltaAxis2, value: intPixels)
+            event.setIntegerValueField(.scrollWheelEventFixedPtDeltaAxis2, value: lineInt * 65536)
+        } else {
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: lineInt)
+            event.setIntegerValueField(.scrollWheelEventPointDeltaAxis1, value: intPixels)
+            event.setIntegerValueField(.scrollWheelEventFixedPtDeltaAxis1, value: lineInt * 65536)
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: 0)
+            event.setIntegerValueField(.scrollWheelEventPointDeltaAxis2, value: 0)
+            event.setIntegerValueField(.scrollWheelEventFixedPtDeltaAxis2, value: 0)
+        }
+
+        event.post(tap: .cgSessionEventTap)
     }
 }
 
@@ -333,6 +398,7 @@ private func scrollCallback(
     let engine = Unmanaged<ScrollEngine>.fromOpaque(userInfo).takeUnretainedValue()
 
     if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+        NSLog("[Inertia] *** TAP DISABLED *** type=%d — re-enabling", type.rawValue)
         if engine.isRunning, let tap = engine.eventTap {
             CGEvent.tapEnable(tap: tap, enable: true)
         }

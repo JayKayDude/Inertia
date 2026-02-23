@@ -56,6 +56,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 NSLog("[Inertia] Engine not started — enabled is false")
             }
         }
+        if ScrollConfig.shared.globalHotkeyEnabled {
+            HotkeyManager.shared.register()
+        }
     }
 
     func showSettings() {
