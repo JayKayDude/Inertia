@@ -6,32 +6,36 @@
 2026-02-23
 
 ## Current Phase
-v2.0 — Three initial features implemented (launch at login, horizontal scrolling, global toggle hotkey)
+v2.0 — 6/8 features implemented, plus tabbed UI restructure
+
+## What Was Done This Session
+- Scroll acceleration toggle (disable speed curve for linear scrolling)
+- Reverse scroll direction (per-axis vertical/horizontal toggles)
+- Scroll distance multiplier with presets (Half/Default/Double/Triple)
+- Tabbed settings window (General / Advanced / Preview tabs)
+- Expanded live preview with 3 test areas (vertical, horizontal, combined)
+- PreviewTextView extended to handle horizontal deltaX
+- Settings window made resizable
 
 ## What Was Decided
-- Horizontal scrolling: single-axis events without scroll phases (matches MMF continuous scroll mode)
-- No phase-ended/began on axis switch — gesture lifecycle shared across axes (matches MOS approach)
-- Event construction: CGEvent(source: nil), field 55=22, isContinuous=1, no scroll phase fields
-- Shift removed from ModifierKey enum (conflicts with horizontal scroll)
-- Modifier hotkeys excluded from horizontal scrolling (Shift conflict)
-- Fast scroll acceleration resets on direction reversal and axis switch
-- Velocity threshold lowered to 30.0 (was 120.0) for visible momentum on slow scrolls
-- Carbon RegisterEventHotKey for global hotkey, with ID verification in callback
-- SMAppService for launch at login (reads system status, no local state)
+- Tab order: General → Advanced → Preview (General opens first)
+- General tab: Enable, Launch at Login, Speed, Smoothness, Reset
+- Advanced tab: Acceleration toggle, Scroll Distance, Horizontal, Reverse, Modifier Hotkeys, Global Hotkey
+- Preview tab: Three labeled scroll test areas (vertical-only, horizontal-only, both)
+- Scroll acceleration toggle bypasses both speed curve AND fastScrollFactor
+- Reverse direction applied via effectiveDirection in ScrollEngine.processScroll
+- Scroll distance multiplier applied after speed curve, before modifier hotkeys
+- Window resizable with .resizable styleMask, default 420x650
 
 ## Current Status
-- All three initial v2.0 features complete and functional
-- Code reviewed by internal subagent and Gemini CLI
-- Bug fixes applied: passRetained→passUnretained (memory leak), onDisappear for HotkeyRecorderView, hotkey callback ID verification
-- Debug logging stripped
-- Documents updated
+- 6/8 v2.0 features complete
+- Tabbed UI restructure complete
+- All changes committed (4 commits this session)
+- Code reviewed by subagents and Gemini CLI — no bugs found
 
 ## Next Actions
-- [ ] App blacklist — per-app disable
-- [ ] Scroll distance multiplier
-- [ ] Reverse scroll direction per-axis
-- [ ] Scroll acceleration toggle
-- [ ] Per-app scroll profiles
+- [ ] App blacklist — per-app disable with app picker UI
+- [ ] Per-app scroll profiles — different speed/smoothness per app
 - [ ] Signed .app / .dmg distribution
 
 ## Open Questions

@@ -89,13 +89,14 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Remove Shift from ModifierKey enum (conflicts with horizontal scroll)
 
 ### Scroll Distance Multiplier
-- [ ] Simple "scroll more/less per tick" setting without changing the feel
-- [ ] Slider in settings
+- [x] Simple "scroll more/less per tick" setting without changing the feel
+- [x] Presets (Half/Default/Double/Triple) with slider
+- [x] Multiplier applied in ScrollEngine after speed curve
 
 ### Reverse Scroll Direction
-- [ ] Toggle to reverse vertical scroll direction (independent from trackpad)
-- [ ] Toggle to reverse horizontal scroll direction
-- [ ] Settings UI with per-axis toggles
+- [x] Toggle to reverse vertical scroll direction (independent from trackpad)
+- [x] Toggle to reverse horizontal scroll direction
+- [x] Settings UI with per-axis toggles
 
 ### Global Toggle Hotkey
 - [x] Customizable keyboard shortcut to enable/disable Inertia without opening menubar
@@ -103,9 +104,15 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Carbon RegisterEventHotKey with hotkey ID verification
 
 ### Scroll Acceleration Toggle
-- [ ] Option to disable the speed curve entirely (linear scrolling)
-- [ ] Every tick scrolls the same amount regardless of scroll speed
-- [ ] Toggle in settings
+- [x] Option to disable the speed curve entirely (linear scrolling)
+- [x] Every tick scrolls the same amount regardless of scroll speed
+- [x] Toggle in settings
+
+### Tabbed Settings Window
+- [x] Reorganized settings into General/Advanced/Preview tabs
+- [x] Expanded live preview with vertical, horizontal, and combined scroll test areas
+- [x] PreviewTextView supports horizontal scroll processing
+- [x] Resizable settings window
 
 ### Per-App Scroll Profiles
 - [ ] Different speed/smoothness settings per app (not just on/off)

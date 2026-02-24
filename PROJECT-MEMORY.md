@@ -57,6 +57,12 @@
 | 2026-02-23 | **velocityThreshold lowered to 30.0** | Was 120.0 (1 px/frame). At 30.0, slow single-tick scrolls get visible momentum (~360ms vs ~83ms). | Active |
 | 2026-02-23 | **Fast scroll acceleration resets on direction/axis change** | consecutiveSwipeCount zeroed on direction reversal and axis switch to prevent carryover. | Active |
 | 2026-02-23 | **CGEventTap callback uses passUnretained** | passRetained leaked every passthrough event. passUnretained is correct since system already owns the event. | Active |
+| 2026-02-23 | **Scroll acceleration toggle** | Bypasses both computeSpeed() curve and fastScrollFactor() when disabled. Returns base speed directly. | Active |
+| 2026-02-23 | **Reverse scroll direction per-axis** | Applied via effectiveDirection in processScroll. Separate toggles for vertical/horizontal. | Active |
+| 2026-02-23 | **Scroll distance multiplier** | Applied after speed curve, before modifier hotkeys. Presets: Half(0.5x), Default(1.0x), Double(2.0x), Triple(3.0x). Range 0.25–3.0x. | Active |
+| 2026-02-23 | **Tabbed settings window** | General/Advanced/Preview tabs. General opens first. Replaced single VStack layout. | Active |
+| 2026-02-23 | **Expanded live preview** | Three test areas: vertical-only, horizontal-only, combined (both axes). PreviewTextView handles deltaX and deltaY. | Active |
+| 2026-02-23 | **Resizable settings window** | Added .resizable to styleMask. Default 420x650. | Active |
 
 ## Versioning
 
@@ -72,10 +78,11 @@
 - ~~Launch at login~~ (done)
 - ~~Horizontal scroll smoothing~~ (done)
 - ~~Global toggle hotkey~~ (done)
+- ~~Scroll acceleration toggle~~ (done)
+- ~~Scroll distance multiplier~~ (done)
+- ~~Reverse scroll direction per-axis~~ (done)
+- ~~Tabbed settings + expanded preview~~ (done)
 - App blacklist (per-app disable)
-- Scroll distance multiplier
-- Reverse scroll direction per-axis
-- Scroll acceleration toggle
 - Per-app scroll profiles
 - Signed distribution
 
