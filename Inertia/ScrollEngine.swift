@@ -27,6 +27,11 @@ class ScrollEngine: ObservableObject {
     private var cachedBaseSpeed: Double = 4.0
     private var cachedSmoothness: Double = 0.6
 
+    private var cachedScrollAccelerationEnabled: Bool = true
+    private var cachedReverseVertical: Bool = false
+    private var cachedReverseHorizontal: Bool = false
+    private var cachedScrollDistanceMultiplier: Double = 1.0
+
     private var cachedModifierHotkeysEnabled: Bool = true
     private var cachedFastModifierFlags: CGEventFlags = .maskControl
     private var cachedSlowModifierFlags: CGEventFlags = .maskAlternate
@@ -142,6 +147,10 @@ class ScrollEngine: ObservableObject {
 
         cachedBaseSpeed = config.baseSpeed
         cachedSmoothness = config.smoothness
+        cachedScrollAccelerationEnabled = config.scrollAccelerationEnabled
+        cachedReverseVertical = config.reverseVertical
+        cachedReverseHorizontal = config.reverseHorizontal
+        cachedScrollDistanceMultiplier = config.scrollDistanceMultiplier
         cachedModifierHotkeysEnabled = config.modifierHotkeysEnabled
         cachedFastModifierFlags = (ModifierKey(rawValue: config.fastModifier) ?? .control).flags
         cachedSlowModifierFlags = (ModifierKey(rawValue: config.slowModifier) ?? .option).flags
@@ -154,6 +163,7 @@ class ScrollEngine: ObservableObject {
         cachedFriction = pow(0.5, 1.0 / halfLifeFrames)
 
         let direction: Double = rawDelta > 0 ? 1.0 : -1.0
+        let effectiveDirection = (isHorizontal ? cachedReverseHorizontal : cachedReverseVertical) ? -direction : direction
 
         if dt > 0.16 || direction != lastDirection {
             if direction != lastDirection {
@@ -179,8 +189,9 @@ class ScrollEngine: ObservableObject {
         lastDirection = direction
 
         let speed = computeSpeed(tickRate: tickRate)
-        let fast = fastScrollFactor()
-        var impulse = direction * speed * ScrollEngine.pixelsPerTick * fast
+        let fast = cachedScrollAccelerationEnabled ? fastScrollFactor() : 1.0
+        var impulse = effectiveDirection * speed * ScrollEngine.pixelsPerTick * fast
+        impulse *= cachedScrollDistanceMultiplier
 
         if cachedModifierHotkeysEnabled && !isHorizontal {
             if flags.contains(cachedFastModifierFlags) {
@@ -237,6 +248,7 @@ class ScrollEngine: ObservableObject {
 
     private func computeSpeed(tickRate: Double) -> Double {
         let base = cachedBaseSpeed
+        if !cachedScrollAccelerationEnabled { return base }
         let b = 1.1
         let c = 1.5
         let t = 8.0

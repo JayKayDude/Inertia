@@ -70,6 +70,26 @@ enum SmoothnessPreset: String, CaseIterable, Identifiable {
     }
 }
 
+enum ScrollDistancePreset: String, CaseIterable, Identifiable {
+    case half = "Half"
+    case `default` = "Default"
+    case double = "Double"
+    case triple = "Triple"
+    case custom = "Custom"
+
+    var id: String { rawValue }
+
+    var multiplier: Double {
+        switch self {
+        case .half: return 0.5
+        case .default: return 1.0
+        case .double: return 2.0
+        case .triple: return 3.0
+        case .custom: return -1
+        }
+    }
+}
+
 class ScrollConfig: ObservableObject {
     static let shared = ScrollConfig()
 
@@ -86,15 +106,22 @@ class ScrollConfig: ObservableObject {
 
     @AppStorage("horizontalScrollEnabled") var horizontalScrollEnabled = true
 
+    @AppStorage("scrollAccelerationEnabled") var scrollAccelerationEnabled = true
+    @AppStorage("reverseVertical") var reverseVertical = false
+    @AppStorage("reverseHorizontal") var reverseHorizontal = false
+    @AppStorage("scrollDistanceMultiplier") var scrollDistanceMultiplier = 1.0
+
     @AppStorage("globalHotkeyEnabled") var globalHotkeyEnabled = false
     @AppStorage("globalHotkeyKeyCode") var globalHotkeyKeyCode = 34
     @AppStorage("globalHotkeyModifiers") var globalHotkeyModifiers = 768
 
     static let fastMultiplierRange = 1.5...5.0
     static let slowMultiplierRange = 0.1...0.8
+    static let scrollDistanceMultiplierRange = 0.25...3.0
 
     @Published var speedPreset: SpeedPreset = .medium
     @Published var smoothnessPreset: SmoothnessPreset = .regular
+    @Published var scrollDistancePreset: ScrollDistancePreset = .default
 
     static let baseSpeedRange = 0.5...10.0
     static let momentumDurationRange = 0.0...0.5
@@ -104,6 +131,22 @@ class ScrollConfig: ObservableObject {
 
     init() {
         syncPresetsFromValues()
+    }
+
+    func applyScrollDistancePreset(_ preset: ScrollDistancePreset) {
+        guard preset != .custom else { return }
+        suppressPresetSync = true
+        scrollDistanceMultiplier = preset.multiplier
+        scrollDistancePreset = preset
+        suppressPresetSync = false
+    }
+
+    func scrollDistanceMultiplierChanged() {
+        guard !suppressPresetSync else { return }
+        let match = ScrollDistancePreset.allCases.first {
+            $0 != .custom && abs($0.multiplier - scrollDistanceMultiplier) < 0.01
+        }
+        scrollDistancePreset = match ?? .custom
     }
 
     func applySpeedPreset(_ preset: SpeedPreset) {
@@ -163,6 +206,11 @@ class ScrollConfig: ObservableObject {
         fastMultiplier = 2.0
         slowMultiplier = 0.5
         horizontalScrollEnabled = true
+        scrollAccelerationEnabled = true
+        reverseVertical = false
+        reverseHorizontal = false
+        scrollDistanceMultiplier = 1.0
+        scrollDistancePreset = .default
         globalHotkeyEnabled = false
         globalHotkeyKeyCode = 34
         globalHotkeyModifiers = 768
@@ -180,5 +228,10 @@ class ScrollConfig: ObservableObject {
                 && abs($0.momentumDuration - momentumDuration) < 0.01
         }
         smoothnessPreset = smoothMatch ?? .custom
+
+        let distMatch = ScrollDistancePreset.allCases.first {
+            $0 != .custom && abs($0.multiplier - scrollDistanceMultiplier) < 0.01
+        }
+        scrollDistancePreset = distMatch ?? .custom
     }
 }

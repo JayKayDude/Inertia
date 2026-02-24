@@ -17,10 +17,13 @@ struct SettingsView: View {
                 launchAtLoginToggle
                 presetSection
                 speedSliderSection
+                scrollAccelerationToggle
                 smoothnessSection
                 momentumDurationSliderSection
+                scrollDistanceSliderSection
                 hotkeysSection
                 horizontalScrollToggle
+                reverseDirectionSection
                 globalHotkeySection
             }
             .padding()
@@ -85,6 +88,10 @@ struct SettingsView: View {
                     config.baseSpeedChanged()
                 }
         }
+    }
+
+    private var scrollAccelerationToggle: some View {
+        Toggle("Scroll Acceleration", isOn: $config.scrollAccelerationEnabled)
     }
 
     private var smoothnessSection: some View {
@@ -214,8 +221,43 @@ struct SettingsView: View {
         ))
     }
 
+    private var scrollDistanceSliderSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Scroll Distance")
+                .font(.headline)
+
+            HStack(spacing: 8) {
+                ForEach(ScrollDistancePreset.allCases.filter { $0 != .custom }) { preset in
+                    Button(preset.rawValue) {
+                        config.applyScrollDistancePreset(preset)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(config.scrollDistancePreset == preset ? .accentColor : nil)
+                }
+            }
+
+            sliderRow(
+                label: "Multiplier",
+                value: $config.scrollDistanceMultiplier,
+                range: ScrollConfig.scrollDistanceMultiplierRange,
+                step: 0.05,
+                format: "%.2fx"
+            )
+            .onChange(of: config.scrollDistanceMultiplier) { _, _ in
+                config.scrollDistanceMultiplierChanged()
+            }
+        }
+    }
+
     private var horizontalScrollToggle: some View {
         Toggle("Smooth Horizontal Scrolling", isOn: $config.horizontalScrollEnabled)
+    }
+
+    private var reverseDirectionSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle("Reverse Vertical Scroll", isOn: $config.reverseVertical)
+            Toggle("Reverse Horizontal Scroll", isOn: $config.reverseHorizontal)
+        }
     }
 
     private var globalHotkeySection: some View {
