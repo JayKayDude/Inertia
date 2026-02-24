@@ -5,35 +5,50 @@ struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
 
     var body: some View {
-        VStack(spacing: 0) {
-            LivePreviewView()
-                .frame(height: 180)
-                .padding()
+        TabView {
+            generalTab
+                .tabItem { Label("General", systemImage: "gear") }
+            advancedTab
+                .tabItem { Label("Advanced", systemImage: "slider.horizontal.3") }
+            previewTab
+                .tabItem { Label("Preview", systemImage: "eye") }
+        }
+        .frame(width: 420)
+    }
 
-            Divider()
+    private var previewTab: some View {
+        LivePreviewView()
+            .environmentObject(config)
+            .padding()
+    }
 
+    private var generalTab: some View {
+        ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 enableToggle
                 launchAtLoginToggle
                 presetSection
                 speedSliderSection
-                scrollAccelerationToggle
                 smoothnessSection
                 momentumDurationSliderSection
+                footerSection
+            }
+            .padding()
+        }
+    }
+
+    private var advancedTab: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                scrollAccelerationToggle
                 scrollDistanceSliderSection
-                hotkeysSection
                 horizontalScrollToggle
                 reverseDirectionSection
+                hotkeysSection
                 globalHotkeySection
             }
             .padding()
-
-            Divider()
-
-            footerSection
-                .padding()
         }
-        .frame(width: 400)
     }
 
     private var enableToggle: some View {

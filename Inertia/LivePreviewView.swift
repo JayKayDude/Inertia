@@ -5,13 +5,32 @@ struct LivePreviewView: View {
     @EnvironmentObject var config: ScrollConfig
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            previewArea(label: "Vertical") {
+                ScrollablePreview()
+                    .environmentObject(config)
+            }
+
+            previewArea(label: "Horizontal") {
+                HorizontalPreview()
+                    .environmentObject(config)
+            }
+
+            previewArea(label: "Both") {
+                CombinedPreview()
+                    .environmentObject(config)
+            }
+        }
+    }
+
+    private func previewArea<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Live Preview")
+            Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            ScrollablePreview()
-                .environmentObject(config)
+            content()
+                .frame(maxHeight: .infinity)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
@@ -54,45 +73,128 @@ struct ScrollablePreview: NSViewRepresentable {
         textView.textContainer?.widthTracksTextView = true
 
         scrollView.documentView = textView
-        context.coordinator.scrollView = scrollView
-        context.coordinator.config = config
-
         return scrollView
     }
 
-    func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        context.coordinator.config = config
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {}
 
     private func generatePreviewContent() -> String {
         var lines: [String] = []
-        lines.append("Scroll here to test your settings")
+        lines.append("Scroll here to test vertical scrolling")
         lines.append(String(repeating: "─", count: 40))
         lines.append("")
-
         for i in 1...80 {
             lines.append(String(format: "%3d │ The quick brown fox jumps over the lazy dog", i))
         }
-
         lines.append("")
         lines.append(String(repeating: "─", count: 40))
         lines.append("End of preview")
         return lines.joined(separator: "\n")
     }
+}
 
-    class Coordinator {
-        weak var scrollView: NSScrollView?
-        var config: ScrollConfig?
+struct HorizontalPreview: NSViewRepresentable {
+    @EnvironmentObject var config: ScrollConfig
+
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = false
+        scrollView.hasHorizontalScroller = true
+        scrollView.autohidesScrollers = true
+        scrollView.drawsBackground = true
+        scrollView.backgroundColor = .textBackgroundColor
+
+        let textView = PreviewTextView()
+        textView.isEditable = false
+        textView.isSelectable = false
+        textView.backgroundColor = .textBackgroundColor
+        textView.textColor = .labelColor
+        textView.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+
+        textView.string = generateHorizontalContent()
+
+        textView.minSize = NSSize(width: 0, height: 0)
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+        textView.isVerticallyResizable = false
+        textView.isHorizontallyResizable = true
+        textView.autoresizingMask = [.height]
+        textView.textContainer?.containerSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        textView.textContainer?.widthTracksTextView = false
+
+        scrollView.documentView = textView
+        return scrollView
+    }
+
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {}
+
+    private func generateHorizontalContent() -> String {
+        var lines: [String] = []
+        lines.append("Scroll horizontally (Shift+wheel or native) ──▶  " + String(repeating: "═══ ", count: 60))
+        for i in 1...5 {
+            let content = (1...40).map { "[\(i).\($0)]" }.joined(separator: " ── ")
+            lines.append(content)
+        }
+        lines.append(String(repeating: "═══ ", count: 60) + " ◀── End")
+        return lines.joined(separator: "\n")
+    }
+}
+
+struct CombinedPreview: NSViewRepresentable {
+    @EnvironmentObject var config: ScrollConfig
+
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = true
+        scrollView.autohidesScrollers = true
+        scrollView.drawsBackground = true
+        scrollView.backgroundColor = .textBackgroundColor
+
+        let textView = PreviewTextView()
+        textView.isEditable = false
+        textView.isSelectable = false
+        textView.backgroundColor = .textBackgroundColor
+        textView.textColor = .labelColor
+        textView.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+
+        textView.string = generateCombinedContent()
+
+        textView.minSize = NSSize(width: 0, height: 0)
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+        textView.isVerticallyResizable = true
+        textView.isHorizontallyResizable = true
+        textView.autoresizingMask = []
+        textView.textContainer?.containerSize = NSSize(
+            width: CGFloat.greatestFiniteMagnitude,
+            height: CGFloat.greatestFiniteMagnitude
+        )
+        textView.textContainer?.widthTracksTextView = false
+
+        scrollView.documentView = textView
+        return scrollView
+    }
+
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {}
+
+    private func generateCombinedContent() -> String {
+        var lines: [String] = []
+        lines.append("Scroll both directions ──▶")
+        lines.append(String(repeating: "═", count: 200))
+        for row in 1...60 {
+            let cells = (1...30).map { String(format: "[%02d,%02d]", row, $0) }.joined(separator: " ")
+            lines.append(String(format: "%3d │ %@", row, cells))
+        }
+        lines.append(String(repeating: "═", count: 200))
+        lines.append("End")
+        return lines.joined(separator: "\n")
     }
 }
 
 class PreviewTextView: NSTextView {
     private var engine: ScrollEngine { ScrollEngine.shared }
-    private var config: ScrollConfig { ScrollConfig.shared }
 
     override func scrollWheel(with event: NSEvent) {
         guard !event.momentumPhase.contains(.changed),
@@ -107,22 +209,30 @@ class PreviewTextView: NSTextView {
             return
         }
 
-        let rawDelta = Double(event.scrollingDeltaY)
-        guard abs(rawDelta) > 0.001 else { return }
-
-        let processed = engine.processScrollForPreview(deltaY: rawDelta)
-
         guard let scrollView = enclosingScrollView,
               let clipView = scrollView.contentView as? NSClipView else { return }
 
-        var origin = clipView.bounds.origin
-        origin.y -= CGFloat(processed)
+        let rawDeltaY = Double(event.scrollingDeltaY)
+        let rawDeltaX = Double(event.scrollingDeltaX)
 
-        let maxY = max(0, (scrollView.documentView?.frame.height ?? 0) - clipView.bounds.height)
-        origin.y = min(max(origin.y, 0), maxY)
+        var origin = clipView.bounds.origin
+        let docFrame = scrollView.documentView?.frame ?? .zero
+
+        if abs(rawDeltaY) > 0.001 {
+            let processed = engine.processScrollForPreview(deltaY: rawDeltaY)
+            origin.y -= CGFloat(processed)
+            let maxY = max(0, docFrame.height - clipView.bounds.height)
+            origin.y = min(max(origin.y, 0), maxY)
+        }
+
+        if abs(rawDeltaX) > 0.001 {
+            let processed = engine.processScrollForPreview(deltaY: rawDeltaX)
+            origin.x -= CGFloat(processed)
+            let maxX = max(0, docFrame.width - clipView.bounds.width)
+            origin.x = min(max(origin.x, 0), maxX)
+        }
 
         clipView.scroll(to: origin)
         scrollView.reflectScrolledClipView(clipView)
     }
 }
-
