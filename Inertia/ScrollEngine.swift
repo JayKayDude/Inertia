@@ -38,6 +38,9 @@ class ScrollEngine: ObservableObject {
     private var cachedFastMultiplier: Double = 2.0
     private var cachedSlowMultiplier: Double = 0.5
 
+    private var cachedFrontmostBundleID: String?
+    private var workspaceObserver: NSObjectProtocol?
+
     private let config = ScrollConfig.shared
     private let lock = NSLock()
 
@@ -84,6 +87,19 @@ class ScrollEngine: ObservableObject {
         CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: tap, enable: true)
 
+        cachedFrontmostBundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            self?.cachedFrontmostBundleID = app?.bundleIdentifier
+            if ScrollConfig.shared.isAppBlacklisted(app?.bundleIdentifier) {
+                self?.stopAnimation()
+            }
+        }
+
         isRunning = true
         NSLog("[Inertia] Scroll engine running")
     }
@@ -97,6 +113,10 @@ class ScrollEngine: ObservableObject {
         }
         eventTap = nil
         runLoopSource = nil
+        if let obs = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(obs)
+            workspaceObserver = nil
+        }
         stopAnimation()
         isRunning = false
     }
@@ -108,6 +128,8 @@ class ScrollEngine: ObservableObject {
     func handleScrollEvent(_ event: CGEvent) -> CGEvent? {
         let isContinuous = event.getIntegerValueField(.scrollWheelEventIsContinuous)
         if isContinuous == 1 { return event }
+
+        if config.isAppBlacklisted(cachedFrontmostBundleID) { return event }
 
         let rawDeltaY = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
         let rawDeltaX = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2)

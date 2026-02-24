@@ -46,6 +46,7 @@ struct SettingsView: View {
                 reverseDirectionSection
                 hotkeysSection
                 globalHotkeySection
+                AppBlacklistView()
             }
             .padding()
         }

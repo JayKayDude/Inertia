@@ -111,6 +111,27 @@ class ScrollConfig: ObservableObject {
     @AppStorage("reverseHorizontal") var reverseHorizontal = false
     @AppStorage("scrollDistanceMultiplier") var scrollDistanceMultiplier = 1.0
 
+    @AppStorage("blacklistedAppsJSON") var blacklistedAppsJSON = "[]"
+
+    var blacklistedBundleIDs: Set<String> {
+        get {
+            guard let data = blacklistedAppsJSON.data(using: .utf8),
+                  let array = try? JSONDecoder().decode([String].self, from: data) else { return [] }
+            return Set(array)
+        }
+        set {
+            if let data = try? JSONEncoder().encode(Array(newValue).sorted()),
+               let string = String(data: data, encoding: .utf8) {
+                blacklistedAppsJSON = string
+            }
+        }
+    }
+
+    func isAppBlacklisted(_ bundleID: String?) -> Bool {
+        guard let bundleID else { return false }
+        return blacklistedBundleIDs.contains(bundleID)
+    }
+
     @AppStorage("globalHotkeyEnabled") var globalHotkeyEnabled = false
     @AppStorage("globalHotkeyKeyCode") var globalHotkeyKeyCode = 34
     @AppStorage("globalHotkeyModifiers") var globalHotkeyModifiers = 768
@@ -214,6 +235,7 @@ class ScrollConfig: ObservableObject {
         globalHotkeyEnabled = false
         globalHotkeyKeyCode = 34
         globalHotkeyModifiers = 768
+        blacklistedAppsJSON = "[]"
     }
 
     private func syncPresetsFromValues() {

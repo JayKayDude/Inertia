@@ -49,6 +49,7 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 - **Tabbed settings** — organized General, Advanced, and Preview tabs with resizable window
 - **Lightweight** — menubar-only app, no Dock icon, runs silently in the background
 - **Mouse-only** — trackpad scrolling is left completely untouched
+- **Per-app blacklist** — disable smooth scrolling for specific apps (browse or pick from running apps)
 - **Works everywhere** — consistent scroll feel across all apps including Terminal
 
 ---
@@ -100,7 +101,6 @@ The engine constructs scroll events that match macOS's native continuous scroll 
 
 ## Planned for v2.0
 
-- Per-app blacklist (disable smooth scrolling for specific apps)
 - Per-app scroll profiles (different speed/smoothness per app)
 
 ---
