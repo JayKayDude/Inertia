@@ -38,7 +38,13 @@ Most smooth scrolling apps either charge you upfront, lock features behind a pay
 | **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
 | **Global toggle hotkey** | **Yes** | No | No | No | No |
 | **Live preview** | **Yes** | No | No | No | No |
-| **Lightweight** | **~2 MB, menubar** | Full app | Menubar | Menubar | Full app |
+| **Menubar-only (no Dock icon)** | **Yes** | No | Yes | Yes | No |
+| **App size** | **~2 MB** | ~15 MB | ~10 MB | ~5 MB | ~30 MB |
+| **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Obj-C (low) | Non-native (higher) | Non-native (higher) |
+| **No subscription** | **Yes (free / $5 once)** | Yes ($2.99 once) | Yes (free) | No ($10/year) | Yes ($19.99 once) |
+| **Trackpad passthrough** | **Yes** | Yes | Yes | No | Partial |
+| **No telemetry** | **Yes (open source)** | Yes (open source) | Unverified | No | No |
+| **Works in Terminal** | **Yes** | Yes | Partial | No | Partial |
 | **Button remapping** | No | Yes | Yes | No | Yes |
 
 ### What you get for free
@@ -83,9 +89,18 @@ Power-user features for fine-tuning and per-app customization. The free version 
 
 ## Lives in Your Menu Bar
 
-Inertia runs as a menu bar app — no Dock icon, no app window cluttering your screen, no splash screen on launch. It starts automatically, sits quietly in the top-right corner of your screen, and just works.
+Inertia runs entirely from the menu bar — no Dock icon, no floating windows, no splash screen. It starts on login, sits quietly in the corner, and stays out of your way. Apps like Mac Mouse Fix and Smooze Pro open as full applications with Dock icons and persistent windows. Inertia doesn't — click the menu bar icon to adjust settings or toggle on/off, and that's it.
 
-Click the menu bar icon to toggle it on/off, adjust settings, or quit — that's all the UI you ever need to see.
+## Built for Performance
+
+Inertia is written in pure Swift with SwiftUI — the same native technologies Apple uses for its own apps. This matters:
+
+- **~2 MB on disk** — most competitors are 10–50 MB
+- **Minimal CPU usage** — native Swift compiles to optimized machine code, no runtime interpreter or garbage collector overhead
+- **Low memory footprint** — no Electron, no Java, no web views. Just native macOS code running close to the metal
+- **120Hz animation loop** — smooth momentum without waking the CPU more than necessary
+
+Competitors like SmoothScroll and Smooze Pro use non-native frameworks that carry significant overhead for a utility that should be invisible. Older apps like Mac Mouse Fix and Mos are written in Objective-C, which works but lacks Swift's modern memory safety and performance optimizations. Inertia is built to do one thing efficiently and get out of the way.
 
 ---
 

@@ -6,48 +6,38 @@
 2026-02-24
 
 ## Current Phase
-v2.0 — 8/8 features complete
+v2.0 — feature-complete, docs polished
 
 ## What Was Done This Session
-- Per-app scroll profiles (feature 8/8) — full implementation
-  - AppScrollProfile struct with non-optional fields (initialized from globals on add)
-  - Profile editor UI (AppProfilesView.swift) with Speed/Behavior sub-tabs
-  - Speed tab: presets (speed, smoothness, distance), sliders, acceleration toggle
-  - Behavior tab: horizontal scroll, reverse direction, modifier hotkeys (two-column layout)
-  - Modifier hotkey presets (FastMultiplierPreset, SlowMultiplierPreset) as segmented pickers
-  - Profile resolution via resolvedSettings(for:) in ScrollEngine
-  - Window-under-cursor detection (bundleIDUnderCursor) for accurate app targeting
-  - Blacklist warning when profiled app is also blacklisted
-- UI refinements across the app
-  - All toggles switched to .toggleStyle(.switch)
-  - Two-column modifier hotkeys layout (Fast left, Slow right)
-  - Dropdown (.menu) picker for modifier key selection
-  - Window width increased to 520pt
-  - Global hotkey recorder hint after 2 rejected attempts
-- Moved scroll acceleration toggle from Advanced to General tab
-- Scroll acceleration off: 2x base speed compensation
-- Smoothness slider range fixed (0.2–1.0, was 0.0–0.5)
-- Smoothness compensation curve: pow(ratio, 0.15) — gentle ramp
-- Bug fixes from dual code review (internal + Gemini CLI):
-  - passRetained → passUnretained (memory leak on passthrough events)
-  - windowUnderCursor() dispatched to main thread in animationFrame
-  - Profile smoothness/momentumDuration sync on slider change
-  - Expanded NSLock scope to cover all mutable state
-  - Modifier hotkeys now apply to horizontal scroll
-  - Swipe acceleration reset on dt > swipeMaxInterval
-  - Reverse scroll velocity zeroing uses effectiveDirection
-  - animationTimer access protected by lock
-  - Momentum window check throttled to ~10Hz
+- Fixed README free/Pro tier accuracy
+  - Custom sliders, modifier hotkeys moved from Free to Pro in comparison table and feature list
+  - Pro section expanded with custom sliders and modifier hotkeys bullet points
+- Expanded README comparison table (now 24 rows)
+  - Split "Lightweight" into "Menubar-only (no Dock icon)" and "App size" rows
+  - Added "Runtime overhead" row (native Swift vs Obj-C vs non-native)
+  - Added "No subscription" row (highlights SmoothScroll's $10/year)
+  - Added "Trackpad passthrough" row
+  - Added "No telemetry" row (open source = verifiable)
+  - Added "Works in Terminal" row
+- Added "Built for Performance" section to README
+  - ~2 MB vs 10–50 MB competitors
+  - Native Swift = minimal CPU/memory overhead
+  - No Electron/Java/web views
+  - 120Hz animation loop
+  - Contrasts against non-native and Obj-C competitors
+- Expanded "Lives in Your Menu Bar" section
+  - Contrasts against Mac Mouse Fix and Smooze Pro as full apps with Dock icons
+- Committed and pushed README rewrite + v3.0 Pro plan docs
 
 ## Current Status
 - v2.0 feature-complete (8/8)
-- All code reviewed by dual subagents + Gemini CLI — no outstanding bugs
-- Build succeeds
-- All docs updated
+- README polished with 24-row competitor comparison
+- v3.0 Pro plan documented (not implemented)
+- All changes committed and pushed
 
 ## Next Actions
-- [ ] Commit all changes
 - [ ] Signed .app / .dmg distribution
+- [ ] v3.0 Pro implementation (when ready)
 
 ## Open Questions
 None
