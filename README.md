@@ -1,5 +1,10 @@
 # Inertia
 
+![macOS](https://img.shields.io/badge/macOS-15.0%2B-blue)
+![Swift](https://img.shields.io/badge/Swift-5.9-orange)
+![License](https://img.shields.io/badge/license-open%20source-green)
+![Price](https://img.shields.io/badge/price-free-brightgreen)
+
 **Smooth, physics-based mouse scrolling for Mac.**
 
 Inertia replaces the stepped, clunky feel of mouse wheel scrolling on macOS with smooth inertial scrolling — giving any mouse the natural momentum feel of a trackpad.
@@ -102,11 +107,33 @@ Inertia is written in pure Swift with SwiftUI — the same native technologies A
 
 Competitors like SmoothScroll and Smooze Pro use non-native frameworks that carry significant overhead for a utility that should be invisible. Older apps like Mac Mouse Fix and Mos are written in Objective-C, which works but lacks Swift's modern memory safety and performance optimizations. Inertia is built to do one thing efficiently and get out of the way.
 
+## Open Source & Transparent
+
+Inertia is fully open source. This matters for a scroll utility because it runs with Accessibility permissions — one of the most powerful entitlements on macOS. With closed-source apps like SmoothScroll and Smooze Pro, you're trusting that a privileged background process isn't doing anything it shouldn't. With Inertia, you can read every line of code yourself.
+
+- **No telemetry, no analytics, no phone-home** — verifiable, not just claimed
+- **No obfuscated code** — the scroll engine, event interception, and settings are all readable Swift
+- **Community auditable** — anyone can inspect, fork, or contribute
+- **Fully open license** — Mos uses a NonCommercial license that restricts how you can use and distribute it. Inertia's license allows free use and modification with attribution.
+
 ---
 
 ## Screenshots
 
-*Coming soon*
+### Menu Bar
+<img src="screenshots/menubar.png" width="300" alt="Inertia menu bar">
+
+### General Settings
+<img src="screenshots/general.png" width="500" alt="General settings tab">
+
+### Advanced Settings
+<img src="screenshots/advanced.png" width="500" alt="Advanced settings tab">
+
+### Per-App Profiles
+<img src="screenshots/profiles.png" width="500" alt="Per-app scroll profiles">
+
+### Live Preview
+<img src="screenshots/preview.png" width="500" alt="Live preview tab">
 
 ---
 
@@ -138,6 +165,39 @@ Download the latest `.app` from [Releases](https://github.com/JayKayDude/Inertia
 Inertia creates a low-level event tap (`CGEventTap`) that intercepts mouse wheel events before they reach applications. Each wheel tick is converted into smooth momentum using a physics-based speed curve adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix). A high-frequency timer (120Hz) applies friction to the velocity each frame, producing natural deceleration.
 
 The engine constructs scroll events that match macOS's native continuous scroll format, so every app — including Terminal — receives consistent, smooth input.
+
+---
+
+## FAQ
+
+**Does it work with my mouse?**
+Yes — any USB or Bluetooth mouse with a scroll wheel. Logitech, Razer, SteelSeries, generic mice, etc. If macOS sees it as a mouse (not a trackpad), Inertia will smooth it.
+
+**Does it affect my trackpad?**
+No. Inertia only intercepts mouse wheel events. Trackpad scrolling is left completely untouched — your Magic Trackpad or built-in MacBook trackpad will work exactly as before.
+
+**Is it safe? It asks for Accessibility permissions.**
+Accessibility permission is required because Inertia intercepts scroll events at the system level (via `CGEventTap`). This is the same permission every scroll utility needs. Since Inertia is open source, you can verify exactly what the code does — there's no telemetry, no analytics, and no network access.
+
+**Can I use it alongside other mouse utilities?**
+Generally yes, but avoid running two smooth scrolling apps at the same time (e.g., Inertia + Mos) since they'll both try to intercept the same events. Other utilities like button remappers should work fine.
+
+**How do I disable it for specific apps?**
+Use the App Blacklist in the Advanced tab (Pro feature). Add any app where you want normal stepped scrolling — useful for certain games or apps with custom scroll behavior.
+
+**What's the difference between free and Pro?**
+The free version includes presets for speed, smoothness, and scroll distance, plus all toggles (acceleration, reverse scroll, horizontal scroll, global hotkey). Pro ($5) adds custom sliders for fine-tuning, modifier hotkeys, per-app scroll profiles, and per-app blacklist.
+
+---
+
+## Uninstall
+
+1. Quit Inertia from the menu bar (or right-click the menu bar icon and select **Quit Inertia**)
+2. Drag `Inertia.app` to the Trash
+3. Optionally remove preferences: `defaults delete com.jaykecollier.Inertia`
+4. Optionally remove the login item from **System Settings > General > Login Items**
+
+No kernel extensions, no launch daemons, no leftover processes. It's just an app.
 
 ---
 
