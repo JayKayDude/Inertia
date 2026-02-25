@@ -22,6 +22,7 @@ class ScrollEngine: ObservableObject {
     private var subPixelAccumulatorX: Double = 0
     private var lineSubPixelAccumulatorX: Double = 0
     private var scrollOriginWindow: Int = 0
+    private var momentumFrameCount: Int = 0
 
     private var cachedFriction: Double = 0.96
     private var cachedBaseSpeed: Double = 4.0
@@ -93,10 +94,13 @@ class ScrollEngine: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
+            guard let self else { return }
             let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-            self?.cachedFrontmostBundleID = app?.bundleIdentifier
+            self.lock.lock()
+            self.cachedFrontmostBundleID = app?.bundleIdentifier
+            self.lock.unlock()
             if ScrollConfig.shared.isAppBlacklisted(app?.bundleIdentifier) {
-                self?.stopAnimation()
+                self.stopAnimation()
             }
         }
 
@@ -129,7 +133,11 @@ class ScrollEngine: ObservableObject {
         let isContinuous = event.getIntegerValueField(.scrollWheelEventIsContinuous)
         if isContinuous == 1 { return event }
 
-        if config.isAppBlacklisted(cachedFrontmostBundleID) { return event }
+        let scrollTargetBundleID = bundleIDUnderCursor()
+
+        if config.isAppBlacklisted(scrollTargetBundleID) { return event }
+
+        let resolved = config.resolvedSettings(for: scrollTargetBundleID)
 
         let rawDeltaY = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
         let rawDeltaX = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2)
@@ -141,7 +149,7 @@ class ScrollEngine: ObservableObject {
 
         let rawDelta: Double
         if isHorizontal {
-            if !config.horizontalScrollEnabled { return event }
+            if !resolved.horizontalScrollEnabled { return event }
             rawDelta = nativeHorizontal ? rawDeltaX : rawDeltaY
         } else {
             rawDelta = rawDeltaY
@@ -149,9 +157,12 @@ class ScrollEngine: ObservableObject {
 
         if abs(rawDelta) < 0.001 { return event }
 
+        let now = CFAbsoluteTimeGetCurrent()
+
+        lock.lock()
+
         scrollOriginWindow = windowUnderCursor()
 
-        let now = CFAbsoluteTimeGetCurrent()
         let dt = now - lastTickTime
 
         if dt > 0 && dt < 0.16 {
@@ -167,19 +178,19 @@ class ScrollEngine: ObservableObject {
         }
         lastTickTime = now
 
-        cachedBaseSpeed = config.baseSpeed
-        cachedSmoothness = config.smoothness
-        cachedScrollAccelerationEnabled = config.scrollAccelerationEnabled
-        cachedReverseVertical = config.reverseVertical
-        cachedReverseHorizontal = config.reverseHorizontal
-        cachedScrollDistanceMultiplier = config.scrollDistanceMultiplier
-        cachedModifierHotkeysEnabled = config.modifierHotkeysEnabled
-        cachedFastModifierFlags = (ModifierKey(rawValue: config.fastModifier) ?? .control).flags
-        cachedSlowModifierFlags = (ModifierKey(rawValue: config.slowModifier) ?? .option).flags
-        cachedFastMultiplier = config.fastMultiplier
-        cachedSlowMultiplier = config.slowMultiplier
+        cachedBaseSpeed = resolved.baseSpeed
+        cachedSmoothness = resolved.smoothness
+        cachedScrollAccelerationEnabled = resolved.scrollAccelerationEnabled
+        cachedReverseVertical = resolved.reverseVertical
+        cachedReverseHorizontal = resolved.reverseHorizontal
+        cachedScrollDistanceMultiplier = resolved.scrollDistanceMultiplier
+        cachedModifierHotkeysEnabled = resolved.modifierHotkeysEnabled
+        cachedFastModifierFlags = (ModifierKey(rawValue: resolved.fastModifier) ?? .control).flags
+        cachedSlowModifierFlags = (ModifierKey(rawValue: resolved.slowModifier) ?? .option).flags
+        cachedFastMultiplier = resolved.fastMultiplier
+        cachedSlowMultiplier = resolved.slowMultiplier
 
-        let md = config.momentumDuration
+        let md = resolved.momentumDuration
         let halfLifeSeconds = 0.02 + md * 0.2
         let halfLifeFrames = halfLifeSeconds * 120.0
         cachedFriction = pow(0.5, 1.0 / halfLifeFrames)
@@ -188,10 +199,9 @@ class ScrollEngine: ObservableObject {
         let effectiveDirection = (isHorizontal ? cachedReverseHorizontal : cachedReverseVertical) ? -direction : direction
 
         if dt > 0.16 || direction != lastDirection {
-            if direction != lastDirection {
+            if direction != lastDirection || dt > ScrollEngine.swipeMaxInterval {
                 consecutiveSwipeCount = 0
-            } else if consecutiveTickCount >= ScrollEngine.swipeMinTicks
-                && dt <= ScrollEngine.swipeMaxInterval {
+            } else if consecutiveTickCount >= ScrollEngine.swipeMinTicks {
                 let elapsed = now - swipeSequenceStartTime
                 let avgTickSpeed = elapsed > 0 ? Double(swipeSequenceTickCount) / elapsed : 0
                 if avgTickSpeed >= ScrollEngine.swipeMinTickSpeed {
@@ -215,18 +225,20 @@ class ScrollEngine: ObservableObject {
         var impulse = effectiveDirection * speed * ScrollEngine.pixelsPerTick * fast
         impulse *= cachedScrollDistanceMultiplier
 
-        if cachedModifierHotkeysEnabled && !isHorizontal {
+        if cachedModifierHotkeysEnabled {
             if flags.contains(cachedFastModifierFlags) {
                 impulse *= cachedFastMultiplier
             } else if flags.contains(cachedSlowModifierFlags) {
                 impulse *= cachedSlowMultiplier
+                let minImpulse = effectiveDirection * ScrollEngine.pixelsPerLine * 0.25
+                if abs(impulse) < abs(minImpulse) { impulse = minImpulse }
             }
         }
 
         let effectiveSmoothness = min(cachedSmoothness, ScrollEngine.referenceSmoothness)
-        let compensation = (1.0 - effectiveSmoothness) / (1.0 - ScrollEngine.referenceSmoothness)
+        let ratio = (1.0 - effectiveSmoothness) / (1.0 - ScrollEngine.referenceSmoothness)
+        let compensation = pow(ratio, 0.15)
 
-        lock.lock()
         if isHorizontal != scrollAxisIsHorizontal {
             velocity = 0
             subPixelAccumulator = 0
@@ -237,8 +249,8 @@ class ScrollEngine: ObservableObject {
             consecutiveSwipeCount = 0
         }
 
-        if direction > 0 && velocity < 0 { velocity = 0 }
-        if direction < 0 && velocity > 0 { velocity = 0 }
+        if effectiveDirection > 0 && velocity < 0 { velocity = 0 }
+        if effectiveDirection < 0 && velocity > 0 { velocity = 0 }
         velocity = velocity * effectiveSmoothness + impulse * compensation
         let maxVelocity = cachedBaseSpeed * 3.0 * ScrollEngine.pixelsPerTick * 4.0 * fast
         velocity = min(max(velocity, -maxVelocity), maxVelocity)
@@ -260,6 +272,17 @@ class ScrollEngine: ObservableObject {
         return min(factor, 50.0)
     }
 
+    private func bundleIDUnderCursor() -> String? {
+        let windowNum = windowUnderCursor()
+        guard windowNum != 0 else { return cachedFrontmostBundleID }
+        guard let windowInfoList = CGWindowListCopyWindowInfo([.optionIncludingWindow], CGWindowID(windowNum)) as? [[String: Any]],
+              let info = windowInfoList.first,
+              let pid = info[kCGWindowOwnerPID as String] as? pid_t else {
+            return cachedFrontmostBundleID
+        }
+        return NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? cachedFrontmostBundleID
+    }
+
     private func windowUnderCursor() -> Int {
         guard let event = CGEvent(source: nil) else { return 0 }
         let cgPoint = event.location
@@ -270,7 +293,7 @@ class ScrollEngine: ObservableObject {
 
     private func computeSpeed(tickRate: Double) -> Double {
         let base = cachedBaseSpeed
-        if !cachedScrollAccelerationEnabled { return base }
+        if !cachedScrollAccelerationEnabled { return base * 2.0 }
         let b = 1.1
         let c = 1.5
         let t = 8.0
@@ -298,7 +321,6 @@ class ScrollEngine: ObservableObject {
         lineSubPixelAccumulator = 0
         subPixelAccumulatorX = 0
         lineSubPixelAccumulatorX = 0
-        lock.unlock()
 
         animationTimer?.cancel()
         let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
@@ -308,6 +330,7 @@ class ScrollEngine: ObservableObject {
         }
         timer.resume()
         animationTimer = timer
+        lock.unlock()
     }
 
     private func stopAnimation() {
@@ -320,9 +343,9 @@ class ScrollEngine: ObservableObject {
         lineSubPixelAccumulatorX = 0
         consecutiveSwipeCount = 0
         consecutiveTickCount = 0
-        lock.unlock()
         animationTimer?.cancel()
         animationTimer = nil
+        lock.unlock()
     }
 
     private func animationFrame() {
@@ -336,9 +359,9 @@ class ScrollEngine: ObservableObject {
             lineSubPixelAccumulator = 0
             subPixelAccumulatorX = 0
             lineSubPixelAccumulatorX = 0
-            lock.unlock()
             animationTimer?.cancel()
             animationTimer = nil
+            lock.unlock()
             return
         }
 
@@ -371,20 +394,26 @@ class ScrollEngine: ObservableObject {
         lock.unlock()
 
         if inMomentum {
-            let currentWindow = windowUnderCursor()
-            if currentWindow != originWindow && currentWindow != 0 {
-                lock.lock()
-                animating = false
-                velocity = 0
-                subPixelAccumulator = 0
-                lineSubPixelAccumulator = 0
-                subPixelAccumulatorX = 0
-                lineSubPixelAccumulatorX = 0
-                lock.unlock()
-                animationTimer?.cancel()
-                animationTimer = nil
-                return
+            momentumFrameCount += 1
+            if momentumFrameCount % 12 == 0 {
+                var currentWindow = 0
+                DispatchQueue.main.sync { currentWindow = self.windowUnderCursor() }
+                if currentWindow != originWindow && currentWindow != 0 {
+                    lock.lock()
+                    animating = false
+                    velocity = 0
+                    subPixelAccumulator = 0
+                    lineSubPixelAccumulator = 0
+                    subPixelAccumulatorX = 0
+                    lineSubPixelAccumulatorX = 0
+                    animationTimer?.cancel()
+                    animationTimer = nil
+                    lock.unlock()
+                    return
+                }
             }
+        } else {
+            momentumFrameCount = 0
         }
 
         if intPixels == 0 { return }
@@ -433,7 +462,7 @@ private func scrollCallback(
     guard type == .scrollWheel else { return Unmanaged.passUnretained(event) }
 
     if let processed = engine.handleScrollEvent(event) {
-        return Unmanaged.passRetained(processed)
+        return Unmanaged.passUnretained(processed)
     }
 
     return nil

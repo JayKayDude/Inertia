@@ -126,24 +126,25 @@ struct AppBlacklistView: View {
             .sorted { ($0.localizedName ?? "") < ($1.localizedName ?? "") }
     }
 
-    private func appIcon(for bundleID: String) -> Image {
-        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
-            let icon = NSWorkspace.shared.icon(forFile: url.path)
-            return Image(nsImage: icon)
-        }
-        return Image(systemName: "app")
-    }
-
-    private func appName(for bundleID: String) -> String {
-        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
-            return FileManager.default.displayName(atPath: url.path)
-                .replacingOccurrences(of: ".app", with: "")
-        }
-        return bundleID
-    }
 }
 
-private class AddMenuTarget: NSObject {
+func appIcon(for bundleID: String) -> Image {
+    if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+        let icon = NSWorkspace.shared.icon(forFile: url.path)
+        return Image(nsImage: icon)
+    }
+    return Image(systemName: "app")
+}
+
+func appName(for bundleID: String) -> String {
+    if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+        return FileManager.default.displayName(atPath: url.path)
+            .replacingOccurrences(of: ".app", with: "")
+    }
+    return bundleID
+}
+
+class AddMenuTarget: NSObject {
     static let shared = AddMenuTarget()
     var onAdd: ((String?) -> Void)?
     var onBrowse: (() -> Void)?

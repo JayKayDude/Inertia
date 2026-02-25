@@ -3,39 +3,50 @@
 > Updated each session. Tracks current position, blockers, and next actions.
 
 ## Last Updated
-2026-02-23
+2026-02-24
 
 ## Current Phase
-v2.0 — 6/8 features implemented, plus tabbed UI restructure
+v2.0 — 8/8 features complete
 
 ## What Was Done This Session
-- Scroll acceleration toggle (disable speed curve for linear scrolling)
-- Reverse scroll direction (per-axis vertical/horizontal toggles)
-- Scroll distance multiplier with presets (Half/Default/Double/Triple)
-- Tabbed settings window (General / Advanced / Preview tabs)
-- Expanded live preview with 3 test areas (vertical, horizontal, combined)
-- PreviewTextView extended to handle horizontal deltaX
-- Settings window made resizable
-
-## What Was Decided
-- Tab order: General → Advanced → Preview (General opens first)
-- General tab: Enable, Launch at Login, Speed, Smoothness, Reset
-- Advanced tab: Acceleration toggle, Scroll Distance, Horizontal, Reverse, Modifier Hotkeys, Global Hotkey
-- Preview tab: Three labeled scroll test areas (vertical-only, horizontal-only, both)
-- Scroll acceleration toggle bypasses both speed curve AND fastScrollFactor
-- Reverse direction applied via effectiveDirection in ScrollEngine.processScroll
-- Scroll distance multiplier applied after speed curve, before modifier hotkeys
-- Window resizable with .resizable styleMask, default 420x650
+- Per-app scroll profiles (feature 8/8) — full implementation
+  - AppScrollProfile struct with non-optional fields (initialized from globals on add)
+  - Profile editor UI (AppProfilesView.swift) with Speed/Behavior sub-tabs
+  - Speed tab: presets (speed, smoothness, distance), sliders, acceleration toggle
+  - Behavior tab: horizontal scroll, reverse direction, modifier hotkeys (two-column layout)
+  - Modifier hotkey presets (FastMultiplierPreset, SlowMultiplierPreset) as segmented pickers
+  - Profile resolution via resolvedSettings(for:) in ScrollEngine
+  - Window-under-cursor detection (bundleIDUnderCursor) for accurate app targeting
+  - Blacklist warning when profiled app is also blacklisted
+- UI refinements across the app
+  - All toggles switched to .toggleStyle(.switch)
+  - Two-column modifier hotkeys layout (Fast left, Slow right)
+  - Dropdown (.menu) picker for modifier key selection
+  - Window width increased to 520pt
+  - Global hotkey recorder hint after 2 rejected attempts
+- Moved scroll acceleration toggle from Advanced to General tab
+- Scroll acceleration off: 2x base speed compensation
+- Smoothness slider range fixed (0.2–1.0, was 0.0–0.5)
+- Smoothness compensation curve: pow(ratio, 0.15) — gentle ramp
+- Bug fixes from dual code review (internal + Gemini CLI):
+  - passRetained → passUnretained (memory leak on passthrough events)
+  - windowUnderCursor() dispatched to main thread in animationFrame
+  - Profile smoothness/momentumDuration sync on slider change
+  - Expanded NSLock scope to cover all mutable state
+  - Modifier hotkeys now apply to horizontal scroll
+  - Swipe acceleration reset on dt > swipeMaxInterval
+  - Reverse scroll velocity zeroing uses effectiveDirection
+  - animationTimer access protected by lock
+  - Momentum window check throttled to ~10Hz
 
 ## Current Status
-- 6/8 v2.0 features complete
-- Tabbed UI restructure complete
-- All changes committed (4 commits this session)
-- Code reviewed by subagents and Gemini CLI — no bugs found
+- v2.0 feature-complete (8/8)
+- All code reviewed by dual subagents + Gemini CLI — no outstanding bugs
+- Build succeeds
+- All docs updated
 
 ## Next Actions
-- [ ] App blacklist — per-app disable with app picker UI
-- [ ] Per-app scroll profiles — different speed/smoothness per app
+- [ ] Commit all changes
 - [ ] Signed .app / .dmg distribution
 
 ## Open Questions

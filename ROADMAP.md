@@ -66,17 +66,17 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Fix timer/frameInterval mismatch
 - [x] Remove curve steepness setting (imperceptible effect)
 - [x] Remove smoothness slider (imperceptible effect, momentum duration is the meaningful control)
-- [x] Cap momentum duration range to 0.0–0.5
+- [x] Cap momentum duration range to 0.2–1.0
 
 ---
 
 ## v2.0 — Full Release
 
 ### App Blacklist
-- [ ] Per-app blacklist — select apps where smooth scrolling is disabled
-- [ ] UI in settings to add/remove apps (app picker or running apps list)
-- [ ] ScrollEngine checks frontmost app against blacklist and passes events through unmodified
-- [ ] Blacklist persisted via @AppStorage or UserDefaults
+- [x] Per-app blacklist — select apps where smooth scrolling is disabled
+- [x] UI in settings to add/remove apps (app picker or running apps list)
+- [x] ScrollEngine checks window-under-cursor app against blacklist and passes events through unmodified
+- [x] Blacklist persisted via @AppStorage (JSON-encoded array)
 
 ### Launch at Login
 - [x] Option to auto-start Inertia on boot
@@ -105,8 +105,8 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 
 ### Scroll Acceleration Toggle
 - [x] Option to disable the speed curve entirely (linear scrolling)
-- [x] Every tick scrolls the same amount regardless of scroll speed
-- [x] Toggle in settings
+- [x] Every tick scrolls the same amount regardless of scroll speed (2x base speed to compensate)
+- [x] Toggle in General tab
 
 ### Tabbed Settings Window
 - [x] Reorganized settings into General/Advanced/Preview tabs
@@ -115,5 +115,9 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Resizable settings window
 
 ### Per-App Scroll Profiles
-- [ ] Different speed/smoothness settings per app (not just on/off)
+- [x] Different speed/smoothness/distance/modifier settings per app
+- [x] Profile editor UI with Speed and Behavior sub-tabs
+- [x] Profiles stored as JSON in @AppStorage, initialized from global defaults
+- [x] ScrollEngine resolves per-app settings via window-under-cursor detection
+- [x] Blacklist warning shown when profiled app is also blacklisted
 - [x] ~~App icon design~~ (done in v1.0)

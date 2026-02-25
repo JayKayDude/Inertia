@@ -93,6 +93,24 @@
 **Solution:** Added `GetEventParameter` with `kEventParamDirectObject` / `typeEventHotKeyID` check, returning `eventNotHandledErr` for non-matching hotkeys.
 **Prevention:** Always verify hotkey identity in Carbon event handlers. Use a unique 4-char signature (e.g., 0x494E5254 = "INRT").
 
+### 2026-02-24 — Reverse scroll breaks momentum (direction vs effectiveDirection)
+**Symptom:** With reverse scroll enabled, scrolling felt choppy — no smooth momentum
+**Root Cause:** Velocity zeroing check used raw `direction` instead of `effectiveDirection`. When reverse is on, effectiveDirection is opposite to direction. So `direction > 0 && velocity < 0` was always true (velocity was negative from the reversed impulse), zeroing velocity every tick.
+**Solution:** Use `effectiveDirection` for velocity zeroing: `if effectiveDirection > 0 && velocity < 0 { velocity = 0 }`
+**Prevention:** When applying direction transforms (reverse, axis flip), ensure all downstream checks use the transformed direction, not the raw input.
+
+### 2026-02-24 — DispatchQueue.main.sync at 120Hz causes scroll jank
+**Symptom:** Scroll animation stuttered when settings window was open or during heavy UI work
+**Root Cause:** `animationFrame()` on background GCD queue called `DispatchQueue.main.sync` every frame (120Hz) to check `windowUnderCursor()`. When main thread was busy with SwiftUI layout, the sync call blocked the animation thread.
+**Solution:** Throttle the window check to every 12 frames (~10Hz) using a `momentumFrameCount` counter. Still catches cursor movement but doesn't stall animation.
+**Prevention:** Never use `DispatchQueue.main.sync` in high-frequency loops. If main-thread access is needed, throttle it or use async with a flag.
+
+### 2026-02-24 — Smoothness compensation too aggressive at low values
+**Symptom:** Decreasing smoothness dramatically increased scroll speed
+**Root Cause:** Linear compensation `(1-s)/(1-ref)` with ref=0.9 gave 8x multiplier at smoothness=0.2. Designed to normalize total scroll distance, but made low smoothness feel like a speed boost.
+**Solution:** Changed to `pow(ratio, 0.15)` — very gentle curve maxing at ~1.4x. User iterated through sqrt, 4th root, and various exponents before settling on 0.15.
+**Prevention:** When compensation formulas have large range (1x–8x), apply a power < 1.0 to flatten the curve. Test extreme values of the input range.
+
 ### 2026-02-20 — Git repo root was home directory
 **Symptom:** `git status` showed thousands of untracked files from entire home directory. Commit included VEX Pathfinder files.
 **Root Cause:** `.git` folder was at `/Users/jaykecollier/` (leftover from another project), not inside the Inertia folder.

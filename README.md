@@ -43,13 +43,14 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 - **Smooth horizontal scrolling** — hold Shift to scroll horizontally with the same smooth momentum
 - **Launch at login** — optionally start Inertia automatically on boot
 - **Global toggle hotkey** — customizable keyboard shortcut to enable/disable Inertia from anywhere
-- **Scroll acceleration toggle** — disable the speed curve for linear, constant-speed scrolling
+- **Scroll acceleration toggle** — disable the speed curve for linear, constant-speed scrolling (2x base speed to compensate)
 - **Scroll distance multiplier** — scroll more or less per tick with presets (Half, Default, Double, Triple)
 - **Reverse scroll direction** — independent per-axis toggles for vertical and horizontal
-- **Tabbed settings** — organized General, Advanced, and Preview tabs with resizable window
+- **Per-app scroll profiles** — override speed, smoothness, distance, and modifier settings per app
+- **Per-app blacklist** — disable smooth scrolling for specific apps (browse or pick from running apps)
+- **Tabbed settings** — organized General, Advanced, Profiles, and Preview tabs with resizable window
 - **Lightweight** — menubar-only app, no Dock icon, runs silently in the background
 - **Mouse-only** — trackpad scrolling is left completely untouched
-- **Per-app blacklist** — disable smooth scrolling for specific apps (browse or pick from running apps)
 - **Works everywhere** — consistent scroll feel across all apps including Terminal
 
 ---
@@ -96,12 +97,6 @@ Download the latest `.app` from [Releases](https://github.com/JayKayDude/Inertia
 Inertia creates a low-level event tap (`CGEventTap`) that intercepts mouse wheel events before they reach applications. Each wheel tick is converted into smooth momentum using a physics-based speed curve adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix). A high-frequency timer (120Hz) applies friction to the velocity each frame, producing natural deceleration.
 
 The engine constructs scroll events that match macOS's native continuous scroll format, so every app — including Terminal — receives consistent, smooth input.
-
----
-
-## Planned for v2.0
-
-- Per-app scroll profiles (different speed/smoothness per app)
 
 ---
 

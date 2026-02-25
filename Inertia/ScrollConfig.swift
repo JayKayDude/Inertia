@@ -90,6 +90,62 @@ enum ScrollDistancePreset: String, CaseIterable, Identifiable {
     }
 }
 
+enum FastMultiplierPreset: String, CaseIterable, Identifiable {
+    case mild = "Mild"
+    case normal = "Normal"
+    case fast = "Fast"
+    case turbo = "Turbo"
+    case custom = "Custom"
+
+    var id: String { rawValue }
+
+    var multiplier: Double {
+        switch self {
+        case .mild: return 1.5
+        case .normal: return 2.0
+        case .fast: return 3.0
+        case .turbo: return 5.0
+        case .custom: return -1
+        }
+    }
+}
+
+enum SlowMultiplierPreset: String, CaseIterable, Identifiable {
+    case light = "Light"
+    case half = "Half"
+    case quarter = "Quarter"
+    case crawl = "Crawl"
+    case custom = "Custom"
+
+    var id: String { rawValue }
+
+    var multiplier: Double {
+        switch self {
+        case .light: return 0.75
+        case .half: return 0.5
+        case .quarter: return 0.25
+        case .crawl: return 0.1
+        case .custom: return -1
+        }
+    }
+}
+
+struct AppScrollProfile: Codable, Equatable {
+    var baseSpeed: Double
+    var smoothness: Double
+    var momentumDuration: Double
+    var scrollAccelerationEnabled: Bool
+    var scrollDistanceMultiplier: Double
+    var reverseVertical: Bool
+    var reverseHorizontal: Bool
+    var horizontalScrollEnabled: Bool
+    var modifierHotkeysEnabled: Bool
+    var fastModifier: String
+    var slowModifier: String
+    var fastMultiplier: Double
+    var slowMultiplier: Double
+}
+
 class ScrollConfig: ObservableObject {
     static let shared = ScrollConfig()
 
@@ -132,6 +188,65 @@ class ScrollConfig: ObservableObject {
         return blacklistedBundleIDs.contains(bundleID)
     }
 
+    @AppStorage("appProfilesJSON") var appProfilesJSON = "{}"
+
+    var appProfiles: [String: AppScrollProfile] {
+        get {
+            guard let data = appProfilesJSON.data(using: .utf8),
+                  let dict = try? JSONDecoder().decode([String: AppScrollProfile].self, from: data) else { return [:] }
+            return dict
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let string = String(data: data, encoding: .utf8) {
+                appProfilesJSON = string
+            }
+        }
+    }
+
+    func profile(for bundleID: String) -> AppScrollProfile? {
+        appProfiles[bundleID]
+    }
+
+    func setProfile(_ profile: AppScrollProfile, for bundleID: String) {
+        var profiles = appProfiles
+        profiles[bundleID] = profile
+        appProfiles = profiles
+    }
+
+    func removeProfile(for bundleID: String) {
+        var profiles = appProfiles
+        profiles.removeValue(forKey: bundleID)
+        appProfiles = profiles
+    }
+
+    func hasProfile(for bundleID: String) -> Bool {
+        appProfiles[bundleID] != nil
+    }
+
+    func resolvedSettings(for bundleID: String?) -> AppScrollProfile {
+        if let bundleID, let p = appProfiles[bundleID] { return p }
+        return makeDefaultProfile()
+    }
+
+    func makeDefaultProfile() -> AppScrollProfile {
+        AppScrollProfile(
+            baseSpeed: baseSpeed,
+            smoothness: smoothness,
+            momentumDuration: momentumDuration,
+            scrollAccelerationEnabled: scrollAccelerationEnabled,
+            scrollDistanceMultiplier: scrollDistanceMultiplier,
+            reverseVertical: reverseVertical,
+            reverseHorizontal: reverseHorizontal,
+            horizontalScrollEnabled: horizontalScrollEnabled,
+            modifierHotkeysEnabled: modifierHotkeysEnabled,
+            fastModifier: fastModifier,
+            slowModifier: slowModifier,
+            fastMultiplier: fastMultiplier,
+            slowMultiplier: slowMultiplier
+        )
+    }
+
     @AppStorage("globalHotkeyEnabled") var globalHotkeyEnabled = false
     @AppStorage("globalHotkeyKeyCode") var globalHotkeyKeyCode = 34
     @AppStorage("globalHotkeyModifiers") var globalHotkeyModifiers = 768
@@ -145,7 +260,7 @@ class ScrollConfig: ObservableObject {
     @Published var scrollDistancePreset: ScrollDistancePreset = .default
 
     static let baseSpeedRange = 0.5...10.0
-    static let momentumDurationRange = 0.0...0.5
+    static let momentumDurationRange = 0.2...1.0
     static let smoothnessRange = 0.0...1.0
 
     private var suppressPresetSync = false
@@ -202,6 +317,7 @@ class ScrollConfig: ObservableObject {
 
     func momentumDurationChanged() {
         guard !suppressPresetSync else { return }
+        smoothness = momentumDuration
         syncSmoothnessPreset()
     }
 
@@ -236,6 +352,7 @@ class ScrollConfig: ObservableObject {
         globalHotkeyKeyCode = 34
         globalHotkeyModifiers = 768
         blacklistedAppsJSON = "[]"
+        appProfilesJSON = "{}"
     }
 
     private func syncPresetsFromValues() {

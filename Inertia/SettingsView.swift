@@ -10,10 +10,12 @@ struct SettingsView: View {
                 .tabItem { Label("General", systemImage: "gear") }
             advancedTab
                 .tabItem { Label("Advanced", systemImage: "slider.horizontal.3") }
+            profilesTab
+                .tabItem { Label("Profiles", systemImage: "person.crop.rectangle.stack") }
             previewTab
                 .tabItem { Label("Preview", systemImage: "eye") }
         }
-        .frame(width: 420)
+        .frame(width: 520)
     }
 
     private var previewTab: some View {
@@ -31,6 +33,7 @@ struct SettingsView: View {
                 speedSliderSection
                 smoothnessSection
                 momentumDurationSliderSection
+                scrollAccelerationToggle
                 footerSection
             }
             .padding()
@@ -40,7 +43,6 @@ struct SettingsView: View {
     private var advancedTab: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                scrollAccelerationToggle
                 scrollDistanceSliderSection
                 horizontalScrollToggle
                 reverseDirectionSection
@@ -49,6 +51,13 @@ struct SettingsView: View {
                 AppBlacklistView()
             }
             .padding()
+        }
+    }
+
+    private var profilesTab: some View {
+        ScrollView {
+            AppProfilesView()
+                .padding()
         }
     }
 
@@ -64,6 +73,7 @@ struct SettingsView: View {
                 }
             }
         ))
+        .toggleStyle(.switch)
         .font(.headline)
     }
 
@@ -108,6 +118,7 @@ struct SettingsView: View {
 
     private var scrollAccelerationToggle: some View {
         Toggle("Scroll Acceleration", isOn: $config.scrollAccelerationEnabled)
+            .toggleStyle(.switch)
     }
 
     private var smoothnessSection: some View {
@@ -130,10 +141,11 @@ struct SettingsView: View {
     private var hotkeysSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Toggle("Modifier Hotkeys", isOn: $config.modifierHotkeysEnabled)
+                .toggleStyle(.switch)
                 .font(.headline)
 
             if config.modifierHotkeysEnabled {
-                VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 16) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Fast Scroll")
                             .font(.subheadline)
@@ -142,17 +154,29 @@ struct SettingsView: View {
                                 Text(key.displayName).tag(key.rawValue)
                             }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+
+                        Picker("", selection: Binding(
+                            get: { FastMultiplierPreset.allCases.first { $0 != .custom && abs($0.multiplier - config.fastMultiplier) < 0.01 } ?? .custom },
+                            set: { if $0 != .custom { config.fastMultiplier = $0.multiplier } }
+                        )) {
+                            ForEach(FastMultiplierPreset.allCases.filter { $0 != .custom }) { preset in
+                                Text(preset.rawValue).tag(preset)
+                            }
+                        }
                         .pickerStyle(.segmented)
                         .labelsHidden()
 
-                        sliderRow(
-                            label: "Multiplier",
-                            value: $config.fastMultiplier,
-                            range: ScrollConfig.fastMultiplierRange,
-                            step: 0.1,
-                            format: "%.1fx"
-                        )
+                        HStack {
+                            Slider(value: $config.fastMultiplier, in: ScrollConfig.fastMultiplierRange, step: 0.1)
+                            Text(String(format: "%.1fx", config.fastMultiplier))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                                .frame(width: 36, alignment: .trailing)
+                        }
                     }
+                    .frame(maxWidth: .infinity)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Slow Scroll")
@@ -162,17 +186,29 @@ struct SettingsView: View {
                                 Text(key.displayName).tag(key.rawValue)
                             }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+
+                        Picker("", selection: Binding(
+                            get: { SlowMultiplierPreset.allCases.first { $0 != .custom && abs($0.multiplier - config.slowMultiplier) < 0.01 } ?? .custom },
+                            set: { if $0 != .custom { config.slowMultiplier = $0.multiplier } }
+                        )) {
+                            ForEach(SlowMultiplierPreset.allCases.filter { $0 != .custom }) { preset in
+                                Text(preset.rawValue).tag(preset)
+                            }
+                        }
                         .pickerStyle(.segmented)
                         .labelsHidden()
 
-                        sliderRow(
-                            label: "Multiplier",
-                            value: $config.slowMultiplier,
-                            range: ScrollConfig.slowMultiplierRange,
-                            step: 0.05,
-                            format: "%.2fx"
-                        )
+                        HStack {
+                            Slider(value: $config.slowMultiplier, in: ScrollConfig.slowMultiplierRange, step: 0.05)
+                            Text(String(format: "%.2fx", config.slowMultiplier))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                                .frame(width: 36, alignment: .trailing)
+                        }
                     }
+                    .frame(maxWidth: .infinity)
                 }
                 .padding(.leading, 4)
             }
@@ -235,6 +271,7 @@ struct SettingsView: View {
                 }
             }
         ))
+        .toggleStyle(.switch)
     }
 
     private var scrollDistanceSliderSection: some View {
@@ -267,12 +304,15 @@ struct SettingsView: View {
 
     private var horizontalScrollToggle: some View {
         Toggle("Smooth Horizontal Scrolling", isOn: $config.horizontalScrollEnabled)
+            .toggleStyle(.switch)
     }
 
     private var reverseDirectionSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Toggle("Reverse Vertical Scroll", isOn: $config.reverseVertical)
+                .toggleStyle(.switch)
             Toggle("Reverse Horizontal Scroll", isOn: $config.reverseHorizontal)
+                .toggleStyle(.switch)
         }
     }
 
@@ -285,6 +325,7 @@ struct SettingsView: View {
                     HotkeyManager.shared.updateHotkey()
                 }
             ))
+            .toggleStyle(.switch)
             .font(.headline)
 
             if config.globalHotkeyEnabled {
@@ -311,23 +352,31 @@ struct HotkeyRecorderView: View {
     @Binding var modifiers: Int
     @State private var recording = false
     @State private var monitor: Any?
+    @State private var rejectedAttempts = 0
 
     var body: some View {
-        HStack(spacing: 8) {
-            Button(action: { toggleRecording() }) {
-                Text(recording ? "Press keys..." : HotkeyManager.displayString(keyCode: keyCode, modifiers: modifiers))
-                    .frame(minWidth: 100)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-            }
-            .buttonStyle(.bordered)
-            .tint(recording ? .red : nil)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Button(action: { toggleRecording() }) {
+                    Text(recording ? "Press keys..." : HotkeyManager.displayString(keyCode: keyCode, modifiers: modifiers))
+                        .frame(minWidth: 100)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.bordered)
+                .tint(recording ? .red : nil)
 
-            if recording {
-                Button("Cancel") { stopRecording() }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
+                if recording {
+                    Button("Cancel") { stopRecording() }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+            if recording && rejectedAttempts >= 2 {
+                Text("Include a modifier key (Cmd, Option, Control, or Shift)")
                     .font(.caption)
+                    .foregroundStyle(.orange)
             }
         }
         .onDisappear { stopRecording() }
@@ -343,6 +392,7 @@ struct HotkeyRecorderView: View {
 
     private func startRecording() {
         recording = true
+        rejectedAttempts = 0
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             let carbonMods = HotkeyManager.carbonModifiers(from: flags)
@@ -353,6 +403,7 @@ struct HotkeyRecorderView: View {
             }
 
             if carbonMods == 0 {
+                rejectedAttempts += 1
                 return nil
             }
 
