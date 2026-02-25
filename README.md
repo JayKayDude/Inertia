@@ -35,14 +35,15 @@ Most smooth scrolling apps either charge you upfront, lock features behind a pay
 | **Custom speed slider** | **Pro** | No | Yes | Yes | Limited |
 | **Smoothness control** | **Presets (free) + slider (Pro)** | 3 presets | Duration slider | No | No |
 | **Scroll distance control** | **Presets (free) + slider (Pro)** | No | Step size | Sensitivity | Line count |
-| **Modifier hotkeys** | **Pro** | Mouse button only | No | No | No |
+| **Scroll distance presets** | **Yes** | No | No | No | No |
+| **Modifier hotkeys** | **Pro (2 keys)** | Yes (4 keys) | Yes (speed-up key) | No | Partial |
 | **Per-app scroll profiles** | **Yes** | No | Yes | No | Yes |
-| **Per-app blacklist** | **Yes** | No | Yes | No | Yes |
-| **Reverse scroll direction** | **Per-axis** | Yes | Yes | No | Yes |
+| **Per-app blacklist** | **Yes** | No | Yes | Yes | Yes |
+| **Reverse scroll direction** | **Per-axis** | Single toggle | Per-axis | Single toggle | Per-axis |
 | **Horizontal scrolling** | **Yes** | Yes | Yes | No | Yes |
 | **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
-| **Global toggle hotkey** | **Yes** | No | No | No | No |
-| **Live preview** | **Yes** | No | No | No | No |
+| **Global toggle hotkey** | **Yes (unique)** | No | Hold-to-suppress | No | No |
+| **Live preview** | **Yes (unique)** | No | Scroll monitor | No | No |
 | **Menubar-only (no Dock icon)** | **Yes** | No | Yes | Yes | No |
 | **App size** | **~2 MB** | ~15 MB | ~10 MB | ~5 MB | ~30 MB |
 | **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Obj-C (low) | Non-native (higher) | Non-native (higher) |

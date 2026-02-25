@@ -3,6 +3,7 @@ import ServiceManagement
 
 struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
+    @State private var loginItemRefresh = false
 
     var body: some View {
         TabView {
@@ -258,7 +259,7 @@ struct SettingsView: View {
 
     private var launchAtLoginToggle: some View {
         Toggle("Launch at Login", isOn: Binding(
-            get: { SMAppService.mainApp.status == .enabled },
+            get: { _ = loginItemRefresh; return SMAppService.mainApp.status == .enabled },
             set: { newValue in
                 do {
                     if newValue {
@@ -269,9 +270,11 @@ struct SettingsView: View {
                 } catch {
                     NSLog("[Inertia] Launch at login error: \(error)")
                 }
+                loginItemRefresh.toggle()
             }
         ))
         .toggleStyle(.switch)
+        .onAppear { loginItemRefresh.toggle() }
     }
 
     private var scrollDistanceSliderSection: some View {
