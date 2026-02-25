@@ -23,34 +23,34 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 
 ## Why Inertia?
 
-Most smooth scrolling apps either charge you upfront, lock features behind a paywall, or bundle in a bunch of stuff you don't need. Inertia gives you more for free than any competitor charges for.
+Most smooth scrolling apps either charge you upfront, lock features behind a paywall, or bundle in a bunch of stuff you don't need. Inertia gives you a full-featured scroll experience for free — and unique features no competitor has at any price.
 
 | | **Inertia** | Mac Mouse Fix | Mos | SmoothScroll | Smooze Pro |
 |---|---|---|---|---|---|
 | **Price** | **Free** | $2.99 | Free | $10/year | $19.99 |
 | **Open source** | **Yes** | Yes | Yes (NC) | No | No |
-| **Native Swift/SwiftUI** | **Yes** | Obj-C | Obj-C | No | No |
+| **Native Swift/SwiftUI** | **Yes** | Obj-C | Swift (AppKit) | No | No |
 | **Smooth scrolling** | **Yes** | Yes | Yes | Yes | Yes |
 | **Speed presets** | **Yes** | 3 presets | No | No | No |
 | **Custom speed slider** | **Pro** | No | Yes | Yes | Limited |
-| **Smoothness control** | **Presets (free) + slider (Pro)** | 3 presets | Duration slider | No | No |
-| **Scroll distance control** | **Presets (free) + slider (Pro)** | No | Step size | Sensitivity | Line count |
-| **Scroll distance presets** | **Yes** | No | No | No | No |
-| **Modifier hotkeys** | **Pro (2 keys)** | Yes (4 keys) | Yes (speed-up key) | No | Partial |
-| **Per-app scroll profiles** | **Yes** | No | Yes | No | Yes |
-| **Per-app blacklist** | **Yes** | No | Yes | Yes | Yes |
+| **Smoothness control** | **Presets (free) + slider (Pro)** | 3 presets | Duration slider | Animation time | Duration slider |
+| **Scroll distance presets** | **Yes (unique)** | No | No | No | No |
+| **Scroll distance slider** | **Pro** | No | Step size | Sensitivity | Line count |
+| **Modifier hotkeys** | **Pro (2 keys, adjustable multipliers)** | Yes (4 keys, fixed speed) | Yes (speed-up key) | No | Partial |
+| **Per-app scroll profiles** | **Pro** | No | Yes | No | Yes |
+| **Per-app blacklist** | **Pro** | No | Yes | Yes | Yes |
 | **Reverse scroll direction** | **Per-axis** | Single toggle | Per-axis | Single toggle | Per-axis |
-| **Horizontal scrolling** | **Yes** | Yes | Yes | No | Yes |
+| **Horizontal scrolling** | **Yes** | Yes | Yes | Yes | Yes |
 | **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
 | **Global toggle hotkey** | **Yes (unique)** | No | Hold-to-suppress | No | No |
 | **Live preview** | **Yes (unique)** | No | Scroll monitor | No | No |
 | **Menubar-only (no Dock icon)** | **Yes** | No | Yes | Yes | No |
-| **App size** | **~2 MB** | ~15 MB | ~10 MB | ~5 MB | ~30 MB |
-| **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Obj-C (low) | Non-native (higher) | Non-native (higher) |
+| **App size** | **~1 MB** | ~20 MB | ~11 MB | ~2 MB | ~10 MB |
+| **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Swift (low) | Obj-C (low) | Unknown |
 | **No subscription** | **Yes (free / $5 once)** | Yes ($2.99 once) | Yes (free) | No ($10/year) | Yes ($19.99 once) |
 | **Trackpad passthrough** | **Yes** | Yes | Yes | No | Partial |
 | **No telemetry** | **Yes (open source)** | Yes (open source) | Yes (open source, NC) | No | No |
-| **Works in Terminal** | **Yes** | Yes | Partial | No | Partial |
+| **Works in Terminal** | **Yes** | Yes | Partial | Unknown | Unknown |
 | **Button remapping** | No | Yes | Yes | No | Yes |
 
 ### What you get for free
@@ -59,7 +59,8 @@ Every other app in this space either charges upfront or strips out essential fea
 
 - **Speed, smoothness, and distance presets** — all free. Slow, Medium, Fast. Low, Regular, High. Half, Default, Double, Triple. Pick one and go.
 - **Reverse scroll, horizontal scroll, acceleration toggle** — all free.
-- **Global toggle hotkey** — free. One keyboard shortcut to enable/disable from anywhere.
+- **Global toggle hotkey** — free. One keyboard shortcut to enable/disable from anywhere. No other app has this.
+- **Live preview** — free. Test your scroll settings in-app before applying them. No other app has this either.
 - **Custom sliders, modifier hotkeys, per-app profiles, and blacklist** — available with Inertia Pro ($5, optional). Power-user features for fine-tuning and per-app customization.
 
 **Inertia's free version covers what most paid apps charge for.** Pro adds fine-tuning and per-app customization for $5 — no trials, no subscriptions, no nag screens.
@@ -101,12 +102,12 @@ Inertia runs entirely from the menu bar — no Dock icon, no floating windows, n
 
 Inertia is written in pure Swift with SwiftUI — the same native technologies Apple uses for its own apps. This matters:
 
-- **~2 MB on disk** — most competitors are 10–50 MB
+- **~1 MB on disk** — competitors range from 2–20 MB
 - **Minimal CPU usage** — native Swift compiles to optimized machine code, no runtime interpreter or garbage collector overhead
 - **Low memory footprint** — no Electron, no Java, no web views. Just native macOS code running close to the metal
 - **120Hz animation loop** — smooth momentum without waking the CPU more than necessary
 
-Competitors like SmoothScroll and Smooze Pro use non-native frameworks that carry significant overhead for a utility that should be invisible. Older apps like Mac Mouse Fix and Mos are written in Objective-C, which works but lacks Swift's modern memory safety and performance optimizations. Inertia is built to do one thing efficiently and get out of the way.
+Mac Mouse Fix is primarily Objective-C, and SmoothScroll's framework is undisclosed. Mos is Swift but uses the older AppKit framework, not SwiftUI. Inertia is the only app in this space built entirely with modern Swift and SwiftUI — Apple's current-generation UI toolkit — giving it the smallest footprint and cleanest architecture.
 
 ## Open Source & Transparent
 
