@@ -139,11 +139,47 @@ struct AppScrollProfile: Codable, Equatable {
     var reverseVertical: Bool
     var reverseHorizontal: Bool
     var horizontalScrollEnabled: Bool
+    var verticalScrollEnabled: Bool = true
     var modifierHotkeysEnabled: Bool
     var fastModifier: String
     var slowModifier: String
     var fastMultiplier: Double
     var slowMultiplier: Double
+
+    init(baseSpeed: Double, smoothness: Double, momentumDuration: Double, scrollAccelerationEnabled: Bool, scrollDistanceMultiplier: Double, reverseVertical: Bool, reverseHorizontal: Bool, horizontalScrollEnabled: Bool, verticalScrollEnabled: Bool = true, modifierHotkeysEnabled: Bool, fastModifier: String, slowModifier: String, fastMultiplier: Double, slowMultiplier: Double) {
+        self.baseSpeed = baseSpeed
+        self.smoothness = smoothness
+        self.momentumDuration = momentumDuration
+        self.scrollAccelerationEnabled = scrollAccelerationEnabled
+        self.scrollDistanceMultiplier = scrollDistanceMultiplier
+        self.reverseVertical = reverseVertical
+        self.reverseHorizontal = reverseHorizontal
+        self.horizontalScrollEnabled = horizontalScrollEnabled
+        self.verticalScrollEnabled = verticalScrollEnabled
+        self.modifierHotkeysEnabled = modifierHotkeysEnabled
+        self.fastModifier = fastModifier
+        self.slowModifier = slowModifier
+        self.fastMultiplier = fastMultiplier
+        self.slowMultiplier = slowMultiplier
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        baseSpeed = try container.decode(Double.self, forKey: .baseSpeed)
+        smoothness = try container.decode(Double.self, forKey: .smoothness)
+        momentumDuration = try container.decode(Double.self, forKey: .momentumDuration)
+        scrollAccelerationEnabled = try container.decode(Bool.self, forKey: .scrollAccelerationEnabled)
+        scrollDistanceMultiplier = try container.decode(Double.self, forKey: .scrollDistanceMultiplier)
+        reverseVertical = try container.decode(Bool.self, forKey: .reverseVertical)
+        reverseHorizontal = try container.decode(Bool.self, forKey: .reverseHorizontal)
+        horizontalScrollEnabled = try container.decode(Bool.self, forKey: .horizontalScrollEnabled)
+        verticalScrollEnabled = try container.decodeIfPresent(Bool.self, forKey: .verticalScrollEnabled) ?? true
+        modifierHotkeysEnabled = try container.decode(Bool.self, forKey: .modifierHotkeysEnabled)
+        fastModifier = try container.decode(String.self, forKey: .fastModifier)
+        slowModifier = try container.decode(String.self, forKey: .slowModifier)
+        fastMultiplier = try container.decode(Double.self, forKey: .fastMultiplier)
+        slowMultiplier = try container.decode(Double.self, forKey: .slowMultiplier)
+    }
 }
 
 class ScrollConfig: ObservableObject {
@@ -161,6 +197,7 @@ class ScrollConfig: ObservableObject {
     @AppStorage("slowMultiplier") var slowMultiplier = 0.5
 
     @AppStorage("horizontalScrollEnabled") var horizontalScrollEnabled = true
+    @AppStorage("verticalScrollEnabled") var verticalScrollEnabled = true
 
     @AppStorage("scrollAccelerationEnabled") var scrollAccelerationEnabled = true
     @AppStorage("reverseVertical") var reverseVertical = false
@@ -239,6 +276,7 @@ class ScrollConfig: ObservableObject {
             reverseVertical: reverseVertical,
             reverseHorizontal: reverseHorizontal,
             horizontalScrollEnabled: horizontalScrollEnabled,
+            verticalScrollEnabled: verticalScrollEnabled,
             modifierHotkeysEnabled: modifierHotkeysEnabled,
             fastModifier: fastModifier,
             slowModifier: slowModifier,
@@ -343,6 +381,7 @@ class ScrollConfig: ObservableObject {
         fastMultiplier = 2.0
         slowMultiplier = 0.5
         horizontalScrollEnabled = true
+        verticalScrollEnabled = true
         scrollAccelerationEnabled = true
         reverseVertical = false
         reverseHorizontal = false

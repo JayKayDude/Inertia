@@ -232,6 +232,9 @@ struct AppProfilesView: View {
         let profile = config.profile(for: bundleID) ?? config.makeDefaultProfile()
 
         VStack(alignment: .leading, spacing: 16) {
+            Toggle("Smooth Vertical Scrolling", isOn: profileBinding(bundleID: bundleID, keyPath: \.verticalScrollEnabled))
+                .toggleStyle(.switch)
+
             Toggle("Smooth Horizontal Scrolling", isOn: profileBinding(bundleID: bundleID, keyPath: \.horizontalScrollEnabled))
                 .toggleStyle(.switch)
 

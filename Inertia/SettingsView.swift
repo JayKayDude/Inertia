@@ -4,6 +4,8 @@ import ServiceManagement
 struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
     @State private var loginItemRefresh = false
+    @State private var verticalOptionsExpanded = false
+    @State private var horizontalOptionsExpanded = false
 
     var body: some View {
         TabView {
@@ -37,6 +39,7 @@ struct SettingsView: View {
                 scrollAccelerationToggle
                 footerSection
             }
+
             .padding()
         }
     }
@@ -45,12 +48,12 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 scrollDistanceSliderSection
-                horizontalScrollToggle
-                reverseDirectionSection
+                scrollAxesSection
                 hotkeysSection
                 globalHotkeySection
                 AppBlacklistView()
             }
+
             .padding()
         }
     }
@@ -58,6 +61,7 @@ struct SettingsView: View {
     private var profilesTab: some View {
         ScrollView {
             AppProfilesView()
+    
                 .padding()
         }
     }
@@ -305,17 +309,68 @@ struct SettingsView: View {
         }
     }
 
-    private var horizontalScrollToggle: some View {
-        Toggle("Smooth Horizontal Scrolling", isOn: $config.horizontalScrollEnabled)
-            .toggleStyle(.switch)
-    }
+    private var scrollAxesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Scrolling")
+                .font(.headline)
 
-    private var reverseDirectionSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Toggle("Reverse Vertical Scroll", isOn: $config.reverseVertical)
-                .toggleStyle(.switch)
-            Toggle("Reverse Horizontal Scroll", isOn: $config.reverseHorizontal)
-                .toggleStyle(.switch)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Toggle("Smooth Vertical Scrolling", isOn: $config.verticalScrollEnabled)
+                        .toggleStyle(.switch)
+                    Spacer()
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            verticalOptionsExpanded.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .rotationEffect(.degrees(verticalOptionsExpanded ? 90 : 0))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if verticalOptionsExpanded {
+                    Toggle("Reverse Direction", isOn: $config.reverseVertical)
+                        .toggleStyle(.switch)
+                        .padding(.leading, 20)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Toggle("Smooth Horizontal Scrolling", isOn: $config.horizontalScrollEnabled)
+                        .toggleStyle(.switch)
+                    Spacer()
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            horizontalOptionsExpanded.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .rotationEffect(.degrees(horizontalOptionsExpanded ? 90 : 0))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if horizontalOptionsExpanded {
+                    Toggle("Reverse Direction", isOn: $config.reverseHorizontal)
+                        .toggleStyle(.switch)
+                        .padding(.leading, 20)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
         }
     }
 

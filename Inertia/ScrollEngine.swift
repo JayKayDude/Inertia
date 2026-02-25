@@ -152,6 +152,7 @@ class ScrollEngine: ObservableObject {
             if !resolved.horizontalScrollEnabled { return event }
             rawDelta = nativeHorizontal ? rawDeltaX : rawDeltaY
         } else {
+            if !resolved.verticalScrollEnabled { return event }
             rawDelta = rawDeltaY
         }
 
