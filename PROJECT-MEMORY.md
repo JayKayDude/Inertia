@@ -75,6 +75,7 @@
 | 2026-02-24 | **Momentum window check throttled to ~10Hz** | DispatchQueue.main.sync in animationFrame only runs every 12 frames (~10/sec) instead of 120. Prevents scroll jank when main thread is busy. | Active |
 | 2026-02-24 | **Velocity zeroing uses effectiveDirection** | Prevents reverse scroll from killing momentum every tick. Was using raw direction which conflicted with reversed effectiveDirection. | Active |
 | 2026-02-24 | **Settings window width 520pt** | Was 420pt. Increased to fit two-column modifier hotkeys layout. | Active |
+| 2026-02-24 | **Free/Pro tier split** | Free: presets only. Pro ($5): custom sliders, modifier hotkeys, profiles, blacklist. Hidden (not grayed). Local flag placeholder first. | Planned |
 
 ## Versioning
 
@@ -85,6 +86,14 @@
 - Modifier hotkeys for fast/slow scrolling (customizable keys and multipliers)
 - Accessibility permission prompt
 - Thread-safe animation with NSLock
+
+### v3.0 — Pro Version (planned)
+- Free/Pro tier split ($5 for Pro)
+- Free: presets only (speed, smoothness, distance), basic toggles
+- Pro: custom sliders, modifier hotkeys, per-app profiles, blacklist
+- Locked features hidden entirely (not grayed out)
+- Local flag placeholder first, real payment system TBD
+- Pro features listed in README and in-app
 
 ### v2.0 — Full Release (feature-complete)
 - ~~Launch at login~~ (done)

@@ -18,40 +18,66 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 
 ## Why Inertia?
 
-| | Inertia | Mac Mouse Fix | Mos | SmoothScroll |
-|---|---|---|---|---|
-| **Price** | Free | $2.99 | Free | $5.99 |
-| **Open source** | Yes | Yes | Yes | No |
-| **Smooth scrolling** | Yes | Yes | Yes | Yes |
-| **Native Swift/SwiftUI** | Yes | Obj-C | Obj-C | No |
-| **Modifier hotkeys** | Yes (customizable) | Yes | No | No |
-| **Lightweight** | ~2 MB, menubar only | Full app | Menubar | Menubar |
-| **Focused** | Scrolling only | Buttons, gestures, scrolling | Scrolling + reverse | Scrolling |
+Most smooth scrolling apps either charge you upfront, lock features behind a paywall, or bundle in a bunch of stuff you don't need. Inertia gives you more for free than any competitor charges for.
 
-**Inertia does one thing and does it well.** No button remapping, no gesture configuration, no feature bloat. Just smooth scrolling with sensible defaults and fine-tuning for those who want it.
+| | **Inertia** | Mac Mouse Fix | Mos | SmoothScroll | Smooze Pro |
+|---|---|---|---|---|---|
+| **Price** | **Free** | $2.99 | Free | $10/year | $19.99 |
+| **Open source** | **Yes** | Yes | Yes (NC) | No | No |
+| **Native Swift/SwiftUI** | **Yes** | Obj-C | Obj-C | No | No |
+| **Smooth scrolling** | **Yes** | Yes | Yes | Yes | Yes |
+| **Speed presets** | **Yes** | 3 presets | No | No | No |
+| **Custom speed slider** | **Pro** | No | Yes | Yes | Limited |
+| **Smoothness control** | **Presets (free) + slider (Pro)** | 3 presets | Duration slider | No | No |
+| **Scroll distance control** | **Presets (free) + slider (Pro)** | No | Step size | Sensitivity | Line count |
+| **Modifier hotkeys** | **Pro** | Mouse button only | No | No | No |
+| **Per-app scroll profiles** | **Yes** | No | Yes | No | Yes |
+| **Per-app blacklist** | **Yes** | No | Yes | No | Yes |
+| **Reverse scroll direction** | **Per-axis** | Yes | Yes | No | Yes |
+| **Horizontal scrolling** | **Yes** | Yes | Yes | No | Yes |
+| **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
+| **Global toggle hotkey** | **Yes** | No | No | No | No |
+| **Live preview** | **Yes** | No | No | No | No |
+| **Lightweight** | **~2 MB, menubar** | Full app | Menubar | Menubar | Full app |
+| **Button remapping** | No | Yes | Yes | No | Yes |
+
+### What you get for free
+
+Every other app in this space either charges upfront or strips out essential features. With Inertia:
+
+- **Speed, smoothness, and distance presets** — all free. Slow, Medium, Fast. Low, Regular, High. Half, Default, Double, Triple. Pick one and go.
+- **Reverse scroll, horizontal scroll, acceleration toggle** — all free.
+- **Global toggle hotkey** — free. One keyboard shortcut to enable/disable from anywhere.
+- **Custom sliders, modifier hotkeys, per-app profiles, and blacklist** — available with Inertia Pro ($5, optional). Power-user features for fine-tuning and per-app customization.
+
+**Inertia's free version covers what most paid apps charge for.** Pro adds fine-tuning and per-app customization for $5 — no trials, no subscriptions, no nag screens.
 
 ---
 
 ## Features
 
+### Free
 - **Smooth inertial scrolling** — physics-based momentum that coasts naturally after each wheel tick
-- **Speed presets** — Slow, Medium, Fast (plus Custom with a fine-grained slider)
-- **Smoothness presets** — Low, Regular, High (with adjustable momentum duration)
-- **Modifier hotkeys** — hold Control to scroll faster (2x) or Option to scroll slower (0.5x), fully customizable
-- **Enable/disable toggle** — in both the menubar and settings window
-- **Live preview** — test your settings inside the app before using them system-wide
-- **Smooth horizontal scrolling** — hold Shift to scroll horizontally with the same smooth momentum
-- **Launch at login** — optionally start Inertia automatically on boot
-- **Global toggle hotkey** — customizable keyboard shortcut to enable/disable Inertia from anywhere
-- **Scroll acceleration toggle** — disable the speed curve for linear, constant-speed scrolling (2x base speed to compensate)
-- **Scroll distance multiplier** — scroll more or less per tick with presets (Half, Default, Double, Triple)
+- **Speed presets** — Slow, Medium, Fast
+- **Smoothness presets** — Low, Regular, High
+- **Scroll distance presets** — Half, Default, Double, Triple
+- **Scroll acceleration toggle** — disable the speed curve for linear, constant-speed scrolling
 - **Reverse scroll direction** — independent per-axis toggles for vertical and horizontal
-- **Per-app scroll profiles** — override speed, smoothness, distance, and modifier settings per app
-- **Per-app blacklist** — disable smooth scrolling for specific apps (browse or pick from running apps)
-- **Tabbed settings** — organized General, Advanced, Profiles, and Preview tabs with resizable window
-- **Lightweight** — menubar-only app, no Dock icon, runs silently in the background
+- **Smooth horizontal scrolling** — hold Shift to scroll horizontally with the same smooth momentum
+- **Global toggle hotkey** — customizable keyboard shortcut to enable/disable Inertia from anywhere
+- **Live preview** — test your settings inside the app before using them system-wide
+- **Launch at login** — optionally start Inertia automatically on boot
+- **Lightweight** — menubar-only, no Dock icon, runs silently in the background
 - **Mouse-only** — trackpad scrolling is left completely untouched
 - **Works everywhere** — consistent scroll feel across all apps including Terminal
+
+### Inertia Pro ($5, optional)
+- **Custom sliders** — fine-tune your exact speed, smoothness, and scroll distance beyond presets
+- **Modifier hotkeys** — hold Control to scroll faster, Option to scroll slower, with customizable keys and multipliers
+- **Per-app scroll profiles** — override speed, smoothness, distance, and modifier settings for specific apps
+- **Per-app blacklist** — disable smooth scrolling entirely for specific apps
+
+Power-user features for fine-tuning and per-app customization. The free version is fully functional without them.
 
 ---
 
@@ -59,7 +85,7 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 
 Inertia runs as a menu bar app — no Dock icon, no app window cluttering your screen, no splash screen on launch. It starts automatically, sits quietly in the top-right corner of your screen, and just works.
 
-This matters because a scroll utility needs to be always-on and completely out of the way. You shouldn't have to think about it. Click the menu bar icon to toggle it on/off, adjust settings, or quit — that's all the UI you ever need to see.
+Click the menu bar icon to toggle it on/off, adjust settings, or quit — that's all the UI you ever need to see.
 
 ---
 

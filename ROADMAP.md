@@ -121,3 +121,35 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] ScrollEngine resolves per-app settings via window-under-cursor detection
 - [x] Blacklist warning shown when profiled app is also blacklisted
 - [x] ~~App icon design~~ (done in v1.0)
+
+---
+
+## v3.0 — Pro Version
+
+### Free vs Pro Tier ($5)
+
+**Free tier:**
+- Enable/disable toggle, launch at login
+- Speed presets (Slow/Medium/Fast) — no custom slider
+- Smoothness presets (Low/Regular/High) — no custom slider
+- Scroll distance presets (Half/Default/Double/Triple) — no custom slider
+- Scroll acceleration toggle
+- Reverse scroll direction
+- Smooth horizontal scrolling toggle
+- Global toggle hotkey
+
+**Pro tier ($5):**
+- All custom sliders (base speed, smoothness, scroll distance)
+- Modifier hotkeys (fast/slow scroll with customizable keys and multipliers)
+- Per-app scroll profiles (full profile editor)
+- Per-app blacklist
+
+### Implementation Plan
+- [ ] Simple local flag (`isPro` in @AppStorage) — placeholder for real payment
+- [ ] Gate custom sliders behind Pro (presets remain free)
+- [ ] Hide per-app profiles tab entirely for free users
+- [ ] Hide blacklist section for free users
+- [ ] Hide modifier hotkeys section for free users
+- [ ] Add "Inertia Pro" note in app listing available Pro features
+- [ ] Add Pro features list to README
+- [ ] Wire up actual payment (StoreKit 2 or license key — TBD)
