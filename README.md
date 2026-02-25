@@ -48,7 +48,7 @@ Most smooth scrolling apps either charge you upfront, lock features behind a pay
 | **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Obj-C (low) | Non-native (higher) | Non-native (higher) |
 | **No subscription** | **Yes (free / $5 once)** | Yes ($2.99 once) | Yes (free) | No ($10/year) | Yes ($19.99 once) |
 | **Trackpad passthrough** | **Yes** | Yes | Yes | No | Partial |
-| **No telemetry** | **Yes (open source)** | Yes (open source) | Unverified | No | No |
+| **No telemetry** | **Yes (open source)** | Yes (open source) | Yes (open source, NC) | No | No |
 | **Works in Terminal** | **Yes** | Yes | Partial | No | Partial |
 | **Button remapping** | No | Yes | Yes | No | Yes |
 
@@ -194,7 +194,7 @@ The free version includes presets for speed, smoothness, and scroll distance, pl
 
 1. Quit Inertia from the menu bar (or right-click the menu bar icon and select **Quit Inertia**)
 2. Drag `Inertia.app` to the Trash
-3. Optionally remove preferences: `defaults delete com.jaykecollier.Inertia`
+3. Optionally remove preferences: `defaults delete com.JayKayDude.Inertia`
 4. Optionally remove the login item from **System Settings > General > Login Items**
 
 No kernel extensions, no launch daemons, no leftover processes. It's just an app.
