@@ -5,3 +5,9 @@ xcuserdata/
 DerivedData/
 build/
 
+# Internal AI working docs
+CLAUDE.md
+SESSION-STATE.md
+PROJECT-MEMORY.md
+LEARNING-LOG.md
+
