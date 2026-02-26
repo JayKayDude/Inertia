@@ -1,30 +1,70 @@
 import SwiftUI
 import ServiceManagement
 
+extension Notification.Name {
+    static let settingsContentHeightChanged = Notification.Name("settingsContentHeightChanged")
+}
+
 struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
     @State private var loginItemRefresh = false
     @State private var verticalOptionsExpanded = false
     @State private var horizontalOptionsExpanded = false
+    @State private var selectedTab = 0
+    @State private var tabHeights: [Int: CGFloat] = [3: 532]
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             generalTab
                 .tabItem { Label("General", systemImage: "gear") }
+                .tag(0)
             advancedTab
                 .tabItem { Label("Advanced", systemImage: "slider.horizontal.3") }
+                .tag(1)
             profilesTab
                 .tabItem { Label("Profiles", systemImage: "person.crop.rectangle.stack") }
+                .tag(2)
             previewTab
                 .tabItem { Label("Preview", systemImage: "eye") }
+                .tag(3)
         }
         .frame(width: 520)
+        .onChange(of: selectedTab) { _, newTab in
+            if let height = tabHeights[newTab] {
+                NSLog("[Inertia] tab changed to %d, posting stored height %.1f", newTab, height)
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(
+                        name: .settingsContentHeightChanged,
+                        object: nil,
+                        userInfo: ["height": height]
+                    )
+                }
+            }
+        }
+    }
+
+    private func updateTabHeight(_ tab: Int, _ height: CGFloat) {
+        let old = tabHeights[tab]
+        tabHeights[tab] = height
+        if tab == selectedTab && (old == nil || abs(height - old!) > 5) {
+            NSLog("[Inertia] active tab %d height changed %.1f -> %.1f, posting", tab, old ?? 0, height)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(
+                    name: .settingsContentHeightChanged,
+                    object: nil,
+                    userInfo: ["height": height]
+                )
+            }
+        }
     }
 
     private var previewTab: some View {
-        LivePreviewView()
-            .environmentObject(config)
-            .padding()
+        ScrollView {
+            LivePreviewView()
+                .environmentObject(config)
+                .frame(height: 500)
+                .padding()
+        }
     }
 
     private var generalTab: some View {
@@ -39,8 +79,14 @@ struct SettingsView: View {
                 scrollAccelerationToggle
                 footerSection
             }
-
             .padding()
+            .background(
+                GeometryReader { geo in
+                    Color.clear.onChange(of: geo.size.height, initial: true) { _, newHeight in
+                        updateTabHeight(0, newHeight)
+                    }
+                }
+            )
         }
     }
 
@@ -53,16 +99,28 @@ struct SettingsView: View {
                 globalHotkeySection
                 AppBlacklistView()
             }
-
             .padding()
+            .background(
+                GeometryReader { geo in
+                    Color.clear.onChange(of: geo.size.height, initial: true) { _, newHeight in
+                        updateTabHeight(1, newHeight)
+                    }
+                }
+            )
         }
     }
 
     private var profilesTab: some View {
         ScrollView {
             AppProfilesView()
-    
                 .padding()
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.onChange(of: geo.size.height, initial: true) { _, newHeight in
+                            updateTabHeight(2, newHeight)
+                        }
+                    }
+                )
         }
     }
 
