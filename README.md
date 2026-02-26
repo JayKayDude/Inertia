@@ -45,6 +45,7 @@ Inertia is 100% free with no paywalls, no tiers, no locked features. Every featu
 | **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
 | **Global toggle hotkey** | **Yes (unique)** | No | Hold-to-suppress | No | No |
 | **Live preview** | **Yes (unique)** | No | Scroll monitor | No | No |
+| **Animated settings window** | **Yes** | No | No | No | No |
 | **Menubar-only (no Dock icon)** | **Yes** | No | Yes | Yes | No |
 | **App size** | **~1 MB** | ~20 MB | ~11 MB | ~2 MB | ~10 MB |
 | **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Swift (low) | Obj-C (low) | Unknown |
@@ -92,6 +93,7 @@ No competitor has these features at any price:
 - **Per-app blacklist** — disable smooth scrolling entirely for specific apps
 - **Global toggle hotkey** — customizable keyboard shortcut to enable/disable Inertia from anywhere
 - **Live preview** — test your settings inside the app before using them system-wide
+- **Animated settings window** — settings window smoothly resizes when switching tabs or expanding sections
 - **Launch at login** — optionally start Inertia automatically on boot
 - **Lightweight** — menubar-only, no Dock icon, runs silently in the background
 - **Mouse-only** — trackpad scrolling is left completely untouched
@@ -210,7 +212,7 @@ No kernel extensions, no launch daemons, no leftover processes. It's just an app
 
 ## Credits
 
-Inertia's scroll physics are adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) by Noah Nuebling. Inertia is a derivative work with substantial changes: completely rewritten engine in pure Swift, new SwiftUI interface, stripped to smooth scrolling only, and released free and open source. Full attribution is maintained in the app's Credits window.
+Inertia's scroll physics are adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) by Noah Nuebling. Inertia is a derivative work with substantial changes: completely rewritten engine in pure Swift, new SwiftUI interface, stripped to smooth scrolling only, and released free and open source. Full attribution is maintained in the app's About window.
 
 App icon created by [Freepik — Flaticon](https://www.flaticon.com/free-icons/inertia).
 

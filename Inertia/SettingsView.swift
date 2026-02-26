@@ -31,7 +31,6 @@ struct SettingsView: View {
         .frame(width: 520)
         .onChange(of: selectedTab) { _, newTab in
             if let height = tabHeights[newTab] {
-                NSLog("[Inertia] tab changed to %d, posting stored height %.1f", newTab, height)
                 DispatchQueue.main.async {
                     NotificationCenter.default.post(
                         name: .settingsContentHeightChanged,
@@ -47,7 +46,6 @@ struct SettingsView: View {
         let old = tabHeights[tab]
         tabHeights[tab] = height
         if tab == selectedTab && (old == nil || abs(height - old!) > 5) {
-            NSLog("[Inertia] active tab %d height changed %.1f -> %.1f, posting", tab, old ?? 0, height)
             DispatchQueue.main.async {
                 NotificationCenter.default.post(
                     name: .settingsContentHeightChanged,

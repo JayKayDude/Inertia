@@ -1,13 +1,50 @@
 import SwiftUI
 
-struct CreditsView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Credits")
-                .font(.title2)
-                .fontWeight(.semibold)
+struct AboutView: View {
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
 
-            VStack(alignment: .leading, spacing: 16) {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+
+            VStack(spacing: 4) {
+                Text("Inertia")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Text("Version \(appVersion)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            VStack(spacing: 4) {
+                Text("JayKayDude")
+                    .font(.headline)
+                Text("Young Developer")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Link("GitHub Profile", destination: URL(string: "https://github.com/JayKayDude")!)
+                    .font(.caption)
+            }
+
+            Divider()
+
+            Button("Support Inertia") {}
+                .buttonStyle(.bordered)
+                .disabled(true)
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Credits")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+
                 creditEntry(
                     name: "Mac Mouse Fix",
                     description: "Physics formulas reference — by Noah Nuebling",
@@ -20,21 +57,21 @@ struct CreditsView: View {
                     url: "https://www.flaticon.com/free-icons/inertia"
                 )
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer()
 
             Link("Inertia on GitHub", destination: URL(string: "https://github.com/JayKayDude/Inertia")!)
                 .font(.caption)
-                .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(24)
-        .frame(width: 320, height: 220)
+        .frame(width: 300)
     }
 
     private func creditEntry(name: String, description: String, url: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Link(name, destination: URL(string: url)!)
-                .font(.headline)
+                .font(.subheadline)
             Text(description)
                 .font(.caption)
                 .foregroundStyle(.secondary)
