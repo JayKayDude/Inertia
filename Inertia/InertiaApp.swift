@@ -42,7 +42,7 @@ struct InertiaApp: App {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var settingsWindow: NSWindow?
     private var settingsHostingController: NSHostingController<AnyView>?
     private var creditsWindow: NSWindow?
@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
         window.setContentSize(NSSize(width: 520, height: 476))
         window.minSize = NSSize(width: 520, height: 300)
-        window.maxSize = NSSize(width: 520, height: CGFloat.greatestFiniteMagnitude)
+        window.delegate = self
         window.center()
         window.isReleasedWhenClosed = false
         window.makeKeyAndOrderFront(nil)
@@ -265,6 +265,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             window.animator().setFrame(newFrame, display: true)
         }
+    }
+
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+        if sender == settingsWindow {
+            return NSSize(width: 520, height: frameSize.height)
+        }
+        return frameSize
     }
 
     func showCredits() {
