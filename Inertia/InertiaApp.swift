@@ -88,7 +88,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let window = NSWindow(contentViewController: hostingController)
         window.title = "Inertia Settings"
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-        window.setContentSize(NSSize(width: 520, height: 476))
+        window.setContentSize(NSSize(width: 520, height: 444))
         window.minSize = NSSize(width: 520, height: 300)
         window.delegate = self
         window.center()
