@@ -45,7 +45,6 @@ Inertia is 100% free with no paywalls, no tiers, no locked features. Every featu
 | **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
 | **Global toggle hotkey** | **Yes (unique)** | No | Hold-to-suppress | No | No |
 | **Live preview** | **Yes (unique)** | No | Scroll monitor | No | No |
-| **Animated settings window** | **Yes** | No | No | No | No |
 | **Menubar-only (no Dock icon)** | **Yes** | No | Yes | Yes | No |
 | **App size** | **~1 MB** | ~20 MB | ~11 MB | ~2 MB | ~10 MB |
 | **Runtime overhead** | **Native Swift (minimal)** | Obj-C (low) | Swift (low) | Obj-C (low) | Unknown |
