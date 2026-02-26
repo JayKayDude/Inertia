@@ -53,6 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private let tabBarOffset: CGFloat = 28
     private var hasCompletedInitialLayout = false
     private var lastContentHeight: CGFloat = 0
+    private var blockBackingResize = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         AccessibilityManager.shared.ensureAccess {
@@ -111,21 +112,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             object: window,
             queue: .main
         ) { [weak self] _ in
-            guard let self, let w = self.settingsWindow else { return }
-            guard self.lastContentHeight > 0 else { return }
-            let targetContentHeight = self.lastContentHeight + self.tabBarOffset + 8
-            let titleBarHeight = w.frame.height - (w.contentView?.frame.height ?? w.frame.height)
-            let targetWindowHeight = targetContentHeight + titleBarHeight
-            let screen = w.screen ?? NSScreen.main
-            let visibleFrame = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-            let clampedHeight = min(targetWindowHeight, visibleFrame.height)
-            let currentTop = w.frame.origin.y + w.frame.height
-            var newOriginY = currentTop - clampedHeight
-            if newOriginY < visibleFrame.origin.y {
-                newOriginY = visibleFrame.origin.y
-            }
-            let newFrame = NSRect(x: w.frame.origin.x, y: newOriginY, width: w.frame.width, height: clampedHeight)
-            w.setFrame(newFrame, display: true)
+            self?.blockBackingResize = true
         }
 
         closeObserver = NotificationCenter.default.addObserver(
@@ -143,6 +130,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
             self?.debounceWorkItem?.cancel()
             self?.settingsHostingController = nil
+            self?.settingsWindow = nil
         }
     }
 
@@ -173,7 +161,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             height: clampedHeight
         )
 
-        if abs(newFrame.height - window.frame.height) < 1 { return }
+        if abs(newFrame.height - window.frame.height) < 1 {
+            hasCompletedInitialLayout = true
+            return
+        }
 
         if !hasCompletedInitialLayout {
             hasCompletedInitialLayout = true
@@ -191,6 +182,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         if sender == settingsWindow {
+            if blockBackingResize {
+                blockBackingResize = false
+                return sender.frame.size
+            }
             return NSSize(width: 520, height: frameSize.height)
         }
         return frameSize
