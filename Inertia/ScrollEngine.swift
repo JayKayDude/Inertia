@@ -22,7 +22,6 @@ class ScrollEngine: ObservableObject {
     private var subPixelAccumulatorX: Double = 0
     private var lineSubPixelAccumulatorX: Double = 0
     private var scrollOriginWindow: Int = 0
-    private var momentumFrameCount: Int = 0
 
     private var cachedFriction: Double = 0.96
     private var cachedBaseSpeed: Double = 4.0
@@ -395,13 +394,7 @@ class ScrollEngine: ObservableObject {
             lineInt = Int64(lineRounded)
         }
 
-        var shouldCheckWindow = false
-        if inMomentum {
-            momentumFrameCount += 1
-            shouldCheckWindow = momentumFrameCount % 12 == 0
-        } else {
-            momentumFrameCount = 0
-        }
+        let shouldCheckWindow = inMomentum
 
         lock.unlock()
 
