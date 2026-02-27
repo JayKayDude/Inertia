@@ -182,8 +182,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         if sender == settingsWindow {
+            defer { blockBackingResize = false }
             if blockBackingResize {
-                blockBackingResize = false
                 return sender.frame.size
             }
             return NSSize(width: 520, height: frameSize.height)

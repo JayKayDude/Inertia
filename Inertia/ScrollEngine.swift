@@ -275,13 +275,16 @@ class ScrollEngine: ObservableObject {
 
     private func bundleIDUnderCursor() -> String? {
         let windowNum = windowUnderCursor()
-        guard windowNum != 0 else { return cachedFrontmostBundleID }
+        lock.lock()
+        let fallback = cachedFrontmostBundleID
+        lock.unlock()
+        guard windowNum != 0 else { return fallback }
         guard let windowInfoList = CGWindowListCopyWindowInfo([.optionIncludingWindow], CGWindowID(windowNum)) as? [[String: Any]],
               let info = windowInfoList.first,
               let pid = info[kCGWindowOwnerPID as String] as? pid_t else {
-            return cachedFrontmostBundleID
+            return fallback
         }
-        return NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? cachedFrontmostBundleID
+        return NSRunningApplication(processIdentifier: pid)?.bundleIdentifier ?? fallback
     }
 
     private func windowUnderCursor() -> Int {
@@ -392,29 +395,22 @@ class ScrollEngine: ObservableObject {
             lineInt = Int64(lineRounded)
         }
 
-        lock.unlock()
-
+        var shouldCheckWindow = false
         if inMomentum {
             momentumFrameCount += 1
-            if momentumFrameCount % 12 == 0 {
-                var currentWindow = 0
-                DispatchQueue.main.sync { currentWindow = self.windowUnderCursor() }
-                if currentWindow != originWindow && currentWindow != 0 {
-                    lock.lock()
-                    animating = false
-                    velocity = 0
-                    subPixelAccumulator = 0
-                    lineSubPixelAccumulator = 0
-                    subPixelAccumulatorX = 0
-                    lineSubPixelAccumulatorX = 0
-                    animationTimer?.cancel()
-                    animationTimer = nil
-                    lock.unlock()
-                    return
-                }
-            }
+            shouldCheckWindow = momentumFrameCount % 12 == 0
         } else {
             momentumFrameCount = 0
+        }
+
+        lock.unlock()
+
+        if shouldCheckWindow {
+            let currentWindow = windowUnderCursor()
+            if currentWindow != originWindow && currentWindow != 0 {
+                stopAnimation()
+                return
+            }
         }
 
         if intPixels == 0 { return }
