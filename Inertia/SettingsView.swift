@@ -1,6 +1,90 @@
 import SwiftUI
 import ServiceManagement
 
+func decodePoints(_ json: String) -> [CurvePoint] {
+    guard let data = json.data(using: .utf8),
+          let pts = try? JSONDecoder().decode([CurvePoint].self, from: data) else { return [] }
+    return pts
+}
+
+func encodePoints(_ pts: [CurvePoint]) -> String {
+    guard let data = try? JSONEncoder().encode(pts),
+          let str = String(data: data, encoding: .utf8) else { return "[]" }
+    return str
+}
+
+class CustomEasingUndoManager: ObservableObject {
+    struct SliderState: Equatable {
+        var friction: Double
+        var shape: Double
+    }
+
+    private var sliderUndo: [SliderState] = []
+    private var sliderRedo: [SliderState] = []
+    private var pointsUndo: [[CurvePoint]] = []
+    private var pointsRedo: [[CurvePoint]] = []
+
+    var canUndoSliders: Bool { !sliderUndo.isEmpty }
+    var canRedoSliders: Bool { !sliderRedo.isEmpty }
+    var canUndoPoints: Bool { !pointsUndo.isEmpty }
+    var canRedoPoints: Bool { !pointsRedo.isEmpty }
+
+    private func notifyChange() {
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
+        }
+    }
+
+    func pushSliderState(_ state: SliderState) {
+        if sliderUndo.last == state { return }
+        sliderUndo.append(state)
+        sliderRedo.removeAll()
+        notifyChange()
+    }
+
+    func undoSliders(current: SliderState) -> SliderState? {
+        guard let prev = sliderUndo.popLast() else { return nil }
+        sliderRedo.append(current)
+        notifyChange()
+        return prev
+    }
+
+    func redoSliders(current: SliderState) -> SliderState? {
+        guard let next = sliderRedo.popLast() else { return nil }
+        sliderUndo.append(current)
+        notifyChange()
+        return next
+    }
+
+    func pushPointsState(_ points: [CurvePoint]) {
+        pointsUndo.append(points)
+        pointsRedo.removeAll()
+        notifyChange()
+    }
+
+    func undoPoints(current: [CurvePoint]) -> [CurvePoint]? {
+        guard let prev = pointsUndo.popLast() else { return nil }
+        pointsRedo.append(current)
+        notifyChange()
+        return prev
+    }
+
+    func redoPoints(current: [CurvePoint]) -> [CurvePoint]? {
+        guard let next = pointsRedo.popLast() else { return nil }
+        pointsUndo.append(current)
+        notifyChange()
+        return next
+    }
+
+    func clear() {
+        sliderUndo.removeAll()
+        sliderRedo.removeAll()
+        pointsUndo.removeAll()
+        pointsRedo.removeAll()
+        notifyChange()
+    }
+}
+
 extension Notification.Name {
     static let settingsContentHeightChanged = Notification.Name("settingsContentHeightChanged")
 }
@@ -8,6 +92,8 @@ extension Notification.Name {
 struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
     @ObservedObject private var engine = ScrollEngine.shared
+    @StateObject private var easingUndo = CustomEasingUndoManager()
+    @State private var selectedCurvePoint: Int? = nil
     @State private var loginItemRefresh = false
     @State private var verticalOptionsExpanded = false
     @State private var horizontalOptionsExpanded = false
@@ -205,11 +291,175 @@ struct SettingsView: View {
                 }
             }
 
-            EasingCurveView(preset: EasingPreset(rawValue: config.easingPreset) ?? .smooth,
-                            momentumDuration: config.momentumDuration,
-                            momentumProgress: engine.momentumProgress)
-                .frame(height: 80)
+            if config.easingPreset == "Custom" {
+                Picker("Mode", selection: $config.customEasingMode) {
+                    Text("Sliders").tag("sliders")
+                    Text("Curve Editor").tag("points")
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+            }
+
+            let currentPreset = EasingPreset(rawValue: config.easingPreset) ?? .smooth
+            let isPointEditing = currentPreset == .custom && config.customEasingMode == "points"
+
+            EasingCurveView(
+                preset: currentPreset,
+                momentumDuration: config.momentumDuration,
+                momentumProgress: engine.momentumProgress,
+                customFriction: config.customEasingFriction,
+                customShape: config.customEasingShape,
+                customMode: config.customEasingMode,
+                customPoints: decodePoints(config.customEasingPoints),
+                isEditing: isPointEditing,
+                onPointsChanged: { pts in
+                    config.customEasingPoints = encodePoints(pts)
+                },
+                onEditingStarted: {
+                    easingUndo.pushPointsState(decodePoints(config.customEasingPoints))
+                },
+                selectedPointIndex: selectedCurvePoint,
+                onSelectionChanged: { selectedCurvePoint = $0 }
+            )
+            .frame(height: isPointEditing ? 140 : 80)
+
+            if config.easingPreset == "Custom" {
+                if config.customEasingMode == "sliders" {
+                    customSlidersSection
+                } else {
+                    Text("Click to add or select points. Drag to move.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                customUndoRedoResetSection
+            }
         }
+    }
+
+    private var customSlidersSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Decay")
+                Spacer()
+                Text(String(format: "%.3f", config.customEasingFriction))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            Slider(value: $config.customEasingFriction, in: ScrollConfig.customEasingFrictionRange, step: 0.005) { editing in
+                if editing {
+                    easingUndo.pushSliderState(.init(friction: config.customEasingFriction, shape: config.customEasingShape))
+                }
+            }
+
+            HStack {
+                Text("Shape")
+                Spacer()
+                Text(String(format: "%.2f", config.customEasingShape))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            Slider(value: $config.customEasingShape, in: ScrollConfig.customEasingShapeRange, step: 0.01) { editing in
+                if editing {
+                    easingUndo.pushSliderState(.init(friction: config.customEasingFriction, shape: config.customEasingShape))
+                }
+            }
+        }
+    }
+
+    private var customUndoRedoResetSection: some View {
+        VStack(spacing: 8) {
+            let isSliders = config.customEasingMode == "sliders"
+            let canUndo = isSliders ? easingUndo.canUndoSliders : easingUndo.canUndoPoints
+            let canRedo = isSliders ? easingUndo.canRedoSliders : easingUndo.canRedoPoints
+
+            HStack(spacing: 12) {
+                Button {
+                    performUndo()
+                } label: {
+                    Label("Undo", systemImage: "arrow.uturn.backward")
+                }
+                .disabled(!canUndo)
+                .keyboardShortcut("z", modifiers: .command)
+
+                Button {
+                    performRedo()
+                } label: {
+                    Label("Redo", systemImage: "arrow.uturn.forward")
+                }
+                .disabled(!canRedo)
+                .keyboardShortcut("z", modifiers: [.command, .shift])
+
+                if !isSliders && selectedCurvePoint != nil {
+                    Button(role: .destructive) {
+                        if let idx = selectedCurvePoint {
+                            deleteSelectedPoint(at: idx)
+                        }
+                    } label: {
+                        Label("Delete Point", systemImage: "trash")
+                    }
+                    .keyboardShortcut(.delete, modifiers: [])
+                }
+            }
+
+            Button("Reset Custom") {
+                performReset()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private func performUndo() {
+        if config.customEasingMode == "sliders" {
+            let current = CustomEasingUndoManager.SliderState(friction: config.customEasingFriction, shape: config.customEasingShape)
+            if let prev = easingUndo.undoSliders(current: current) {
+                config.customEasingFriction = prev.friction
+                config.customEasingShape = prev.shape
+            }
+        } else {
+            let current = decodePoints(config.customEasingPoints)
+            if let prev = easingUndo.undoPoints(current: current) {
+                config.customEasingPoints = encodePoints(prev)
+                selectedCurvePoint = nil
+            }
+        }
+    }
+
+    private func performRedo() {
+        if config.customEasingMode == "sliders" {
+            let current = CustomEasingUndoManager.SliderState(friction: config.customEasingFriction, shape: config.customEasingShape)
+            if let next = easingUndo.redoSliders(current: current) {
+                config.customEasingFriction = next.friction
+                config.customEasingShape = next.shape
+            }
+        } else {
+            let current = decodePoints(config.customEasingPoints)
+            if let next = easingUndo.redoPoints(current: current) {
+                config.customEasingPoints = encodePoints(next)
+                selectedCurvePoint = nil
+            }
+        }
+    }
+
+    private func performReset() {
+        if config.customEasingMode == "sliders" {
+            easingUndo.pushSliderState(.init(friction: config.customEasingFriction, shape: config.customEasingShape))
+            config.customEasingFriction = 0.96
+            config.customEasingShape = 0.0
+        } else {
+            easingUndo.pushPointsState(decodePoints(config.customEasingPoints))
+            config.customEasingPoints = "[]"
+            selectedCurvePoint = nil
+        }
+    }
+
+    private func deleteSelectedPoint(at index: Int) {
+        var pts = decodePoints(config.customEasingPoints)
+        guard index < pts.count else { return }
+        easingUndo.pushPointsState(pts)
+        pts.remove(at: index)
+        config.customEasingPoints = encodePoints(pts)
+        selectedCurvePoint = nil
     }
 
     private var scrollAccelerationToggle: some View {

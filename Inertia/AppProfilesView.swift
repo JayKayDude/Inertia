@@ -8,6 +8,8 @@ struct AppProfilesView: View {
     @State private var runningApps: [NSRunningApplication] = []
     @State private var selection: String?
     @State private var profileTab = 0
+    @StateObject private var easingUndo = CustomEasingUndoManager()
+    @State private var selectedCurvePoint: Int? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -96,6 +98,7 @@ struct AppProfilesView: View {
             }
         }
         .onAppear { refreshRunningApps() }
+        .onChange(of: selection) { _, _ in easingUndo.clear(); selectedCurvePoint = nil }
     }
 
     // MARK: - Speed tab (mirrors General + Advanced speed sections)
@@ -224,10 +227,49 @@ struct AppProfilesView: View {
                     }
                 }
 
-                EasingCurveView(preset: EasingPreset(rawValue: profile.easingPreset) ?? .smooth,
-                                momentumDuration: profile.momentumDuration,
-                                momentumProgress: engine.momentumProgress)
-                    .frame(height: 80)
+                if profile.easingPreset == "Custom" {
+                    Picker("Mode", selection: profileBinding(bundleID: bundleID, keyPath: \.customEasingMode)) {
+                        Text("Sliders").tag("sliders")
+                        Text("Curve Editor").tag("points")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
+
+                let currentPreset = EasingPreset(rawValue: profile.easingPreset) ?? .smooth
+                let isPointEditing = currentPreset == .custom && profile.customEasingMode == "points"
+
+                EasingCurveView(
+                    preset: currentPreset,
+                    momentumDuration: profile.momentumDuration,
+                    momentumProgress: engine.activeScrollBundleID == bundleID ? engine.momentumProgress : nil,
+                    customFriction: profile.customEasingFriction,
+                    customShape: profile.customEasingShape,
+                    customMode: profile.customEasingMode,
+                    customPoints: decodePoints(profile.customEasingPoints),
+                    isEditing: isPointEditing,
+                    onPointsChanged: { pts in
+                        updateProfile(bundleID: bundleID) { $0.customEasingPoints = encodePoints(pts) }
+                    },
+                    onEditingStarted: {
+                        easingUndo.pushPointsState(decodePoints(profile.customEasingPoints))
+                    },
+                    selectedPointIndex: selectedCurvePoint,
+                    onSelectionChanged: { selectedCurvePoint = $0 }
+                )
+                .frame(height: isPointEditing ? 140 : 80)
+
+                if profile.easingPreset == "Custom" {
+                    if profile.customEasingMode == "sliders" {
+                        profileCustomSliders(bundleID: bundleID, profile: profile)
+                    } else {
+                        Text("Click to add or select points. Drag to move.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    profileUndoRedoResetSection(bundleID: bundleID, profile: profile)
+                }
             }
 
             // Scroll Acceleration
@@ -381,6 +423,150 @@ struct AppProfilesView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Custom easing sliders
+
+    @ViewBuilder
+    private func profileCustomSliders(bundleID: String, profile: AppScrollProfile) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Decay")
+                Spacer()
+                Text(String(format: "%.3f", profile.customEasingFriction))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            Slider(
+                value: profileBinding(bundleID: bundleID, keyPath: \.customEasingFriction),
+                in: ScrollConfig.customEasingFrictionRange,
+                step: 0.005
+            ) { editing in
+                if editing {
+                    easingUndo.pushSliderState(.init(friction: profile.customEasingFriction, shape: profile.customEasingShape))
+                }
+            }
+
+            HStack {
+                Text("Shape")
+                Spacer()
+                Text(String(format: "%.2f", profile.customEasingShape))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            Slider(
+                value: profileBinding(bundleID: bundleID, keyPath: \.customEasingShape),
+                in: ScrollConfig.customEasingShapeRange,
+                step: 0.01
+            ) { editing in
+                if editing {
+                    easingUndo.pushSliderState(.init(friction: profile.customEasingFriction, shape: profile.customEasingShape))
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func profileUndoRedoResetSection(bundleID: String, profile: AppScrollProfile) -> some View {
+        VStack(spacing: 8) {
+            let isSliders = profile.customEasingMode == "sliders"
+            let canUndo = isSliders ? easingUndo.canUndoSliders : easingUndo.canUndoPoints
+            let canRedo = isSliders ? easingUndo.canRedoSliders : easingUndo.canRedoPoints
+
+            HStack(spacing: 12) {
+                Button {
+                    profilePerformUndo(bundleID: bundleID)
+                } label: {
+                    Label("Undo", systemImage: "arrow.uturn.backward")
+                }
+                .disabled(!canUndo)
+
+                Button {
+                    profilePerformRedo(bundleID: bundleID)
+                } label: {
+                    Label("Redo", systemImage: "arrow.uturn.forward")
+                }
+                .disabled(!canRedo)
+
+                if !isSliders && selectedCurvePoint != nil {
+                    Button(role: .destructive) {
+                        if let idx = selectedCurvePoint {
+                            profileDeleteSelectedPoint(bundleID: bundleID, at: idx)
+                        }
+                    } label: {
+                        Label("Delete Point", systemImage: "trash")
+                    }
+                }
+            }
+
+            Button("Reset Custom") {
+                profilePerformReset(bundleID: bundleID)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private func profilePerformUndo(bundleID: String) {
+        let profile = config.profile(for: bundleID) ?? config.makeDefaultProfile()
+        if profile.customEasingMode == "sliders" {
+            let current = CustomEasingUndoManager.SliderState(friction: profile.customEasingFriction, shape: profile.customEasingShape)
+            if let prev = easingUndo.undoSliders(current: current) {
+                updateProfile(bundleID: bundleID) {
+                    $0.customEasingFriction = prev.friction
+                    $0.customEasingShape = prev.shape
+                }
+            }
+        } else {
+            let current = decodePoints(profile.customEasingPoints)
+            if let prev = easingUndo.undoPoints(current: current) {
+                updateProfile(bundleID: bundleID) { $0.customEasingPoints = encodePoints(prev) }
+                selectedCurvePoint = nil
+            }
+        }
+    }
+
+    private func profilePerformRedo(bundleID: String) {
+        let profile = config.profile(for: bundleID) ?? config.makeDefaultProfile()
+        if profile.customEasingMode == "sliders" {
+            let current = CustomEasingUndoManager.SliderState(friction: profile.customEasingFriction, shape: profile.customEasingShape)
+            if let next = easingUndo.redoSliders(current: current) {
+                updateProfile(bundleID: bundleID) {
+                    $0.customEasingFriction = next.friction
+                    $0.customEasingShape = next.shape
+                }
+            }
+        } else {
+            let current = decodePoints(profile.customEasingPoints)
+            if let next = easingUndo.redoPoints(current: current) {
+                updateProfile(bundleID: bundleID) { $0.customEasingPoints = encodePoints(next) }
+                selectedCurvePoint = nil
+            }
+        }
+    }
+
+    private func profilePerformReset(bundleID: String) {
+        let profile = config.profile(for: bundleID) ?? config.makeDefaultProfile()
+        if profile.customEasingMode == "sliders" {
+            easingUndo.pushSliderState(.init(friction: profile.customEasingFriction, shape: profile.customEasingShape))
+            updateProfile(bundleID: bundleID) {
+                $0.customEasingFriction = 0.96
+                $0.customEasingShape = 0.0
+            }
+        } else {
+            easingUndo.pushPointsState(decodePoints(profile.customEasingPoints))
+            updateProfile(bundleID: bundleID) { $0.customEasingPoints = "[]" }
+            selectedCurvePoint = nil
+        }
+    }
+
+    private func profileDeleteSelectedPoint(bundleID: String, at index: Int) {
+        let profile = config.profile(for: bundleID) ?? config.makeDefaultProfile()
+        var pts = decodePoints(profile.customEasingPoints)
+        guard index < pts.count else { return }
+        easingUndo.pushPointsState(pts)
+        pts.remove(at: index)
+        updateProfile(bundleID: bundleID) { $0.customEasingPoints = encodePoints(pts) }
+        selectedCurvePoint = nil
     }
 
     // MARK: - Helpers

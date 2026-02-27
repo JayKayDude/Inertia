@@ -8,6 +8,7 @@ class ScrollEngine: ObservableObject {
 
     @Published var isRunning = false
     @Published var momentumProgress: Double? = nil
+    @Published var activeScrollBundleID: String? = nil
 
     var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -28,6 +29,10 @@ class ScrollEngine: ObservableObject {
     private var cachedBaseSpeed: Double = 4.0
     private var cachedSmoothness: Double = 0.6
     private var cachedEasingPreset: EasingPreset = .smooth
+    private var cachedCustomFriction: Double = 0.96
+    private var cachedCustomShape: Double = 0.0
+    private var cachedCustomMode: String = "sliders"
+    private var cachedCustomPoints: [CurvePoint] = []
     private var momentumPhaseStarted: Bool = false
     private var momentumFrameCount: Int = 0
     private var momentumInitialVelocity: Double = 0
@@ -45,6 +50,7 @@ class ScrollEngine: ObservableObject {
     private var cachedSlowMultiplier: Double = 0.5
 
     private var cachedFrontmostBundleID: String?
+    private var cachedScrollTargetBundleID: String?
     private var workspaceObserver: NSObjectProtocol?
 
     private let config = ScrollConfig.shared
@@ -149,6 +155,8 @@ class ScrollEngine: ObservableObject {
 
         let resolved = config.resolvedSettings(for: scrollTargetBundleID)
 
+        cachedScrollTargetBundleID = scrollTargetBundleID
+
         let rawDeltaY = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1)
         let rawDeltaX = event.getDoubleValueField(.scrollWheelEventFixedPtDeltaAxis2)
         let flags = CGEventSource.flagsState(.combinedSessionState)
@@ -206,6 +214,17 @@ class ScrollEngine: ObservableObject {
         let halfLifeFrames = halfLifeSeconds * 120.0
         cachedFriction = pow(0.5, 1.0 / halfLifeFrames)
         cachedEasingPreset = EasingPreset(rawValue: resolved.easingPreset) ?? .smooth
+        if cachedEasingPreset == .custom {
+            cachedCustomFriction = resolved.customEasingFriction
+            cachedCustomShape = resolved.customEasingShape
+            cachedCustomMode = resolved.customEasingMode
+            if let data = resolved.customEasingPoints.data(using: .utf8),
+               let pts = try? JSONDecoder().decode([CurvePoint].self, from: data) {
+                cachedCustomPoints = pts
+            } else {
+                cachedCustomPoints = []
+            }
+        }
 
         let direction: Double = rawDelta > 0 ? 1.0 : -1.0
         let effectiveDirection = (isHorizontal ? cachedReverseHorizontal : cachedReverseVertical) ? -direction : direction
@@ -373,6 +392,7 @@ class ScrollEngine: ObservableObject {
         lock.unlock()
         DispatchQueue.main.async { [weak self] in
             self?.momentumProgress = nil
+            self?.activeScrollBundleID = nil
         }
     }
 
@@ -385,7 +405,12 @@ class ScrollEngine: ObservableObject {
             momentumPhaseStarted = true
             momentumFrameCount = 0
             momentumInitialVelocity = velocity
-            cachedTotalFrames = max(estimatedTotalFrames(friction: cachedFriction, initialV: velocity), 10)
+            let frictionForEstimate = cachedEasingPreset == .custom ? cachedCustomFriction : cachedFriction
+            cachedTotalFrames = max(estimatedTotalFrames(friction: frictionForEstimate, initialV: velocity), 10)
+            let bundleID = cachedScrollTargetBundleID
+            DispatchQueue.main.async { [weak self] in
+                self?.activeScrollBundleID = bundleID
+            }
         }
 
         if inMomentum && momentumPhaseStarted {
@@ -405,6 +430,16 @@ class ScrollEngine: ObservableObject {
             case .gradual:
                 let f = cachedFriction + (1.0 - cachedFriction) * 0.5 * (1.0 - t)
                 velocity *= f
+            case .custom:
+                if cachedCustomMode == "points" && !cachedCustomPoints.isEmpty {
+                    let targetV = interpolateCurve(at: t) * abs(momentumInitialVelocity)
+                    let sign: Double = momentumInitialVelocity > 0 ? 1.0 : -1.0
+                    velocity = sign * targetV
+                } else {
+                    let shapeFactor = cachedCustomShape * (1.0 - t)
+                    let f = min(cachedCustomFriction * (1.0 - shapeFactor), 1.0)
+                    velocity *= f
+                }
             }
 
             if momentumFrameCount % 2 == 0 || momentumFrameCount == 1 {
@@ -431,6 +466,7 @@ class ScrollEngine: ObservableObject {
             lock.unlock()
             DispatchQueue.main.async { [weak self] in
                 self?.momentumProgress = nil
+                self?.activeScrollBundleID = nil
             }
             return
         }
@@ -494,6 +530,62 @@ class ScrollEngine: ObservableObject {
         }
 
         event.post(tap: .cgSessionEventTap)
+    }
+
+    private func interpolateCurve(at t: Double) -> Double {
+        var pts = [CurvePoint(x: 0, y: 1)] + cachedCustomPoints.sorted(by: { $0.x < $1.x }) + [CurvePoint(x: 1, y: 0)]
+        let n = pts.count
+        if n == 2 { return 1.0 - t }
+        let clamped = min(max(t, 0), 1)
+
+        var k = 0
+        for i in 0..<(n - 1) {
+            if clamped >= pts[i].x && clamped <= pts[i + 1].x { k = i; break }
+            if i == n - 2 { k = i }
+        }
+
+        let dx = Array(0..<(n - 1)).map { pts[$0 + 1].x - pts[$0].x }
+        let dy = Array(0..<(n - 1)).map { pts[$0 + 1].y - pts[$0].y }
+        var m = Array(repeating: 0.0, count: n)
+
+        for i in 0..<(n - 1) {
+            if dx[i] > 0 { m[i] = dy[i] / dx[i] } else { m[i] = 0 }
+        }
+
+        var tangents = Array(repeating: 0.0, count: n)
+        tangents[0] = m[0]
+        tangents[n - 1] = m[n - 2]
+        for i in 1..<(n - 1) {
+            if m[i - 1] * m[i] <= 0 {
+                tangents[i] = 0
+            } else {
+                tangents[i] = (m[i - 1] + m[i]) / 2.0
+            }
+        }
+
+        for i in 0..<(n - 1) {
+            guard dx[i] > 0 else { continue }
+            let alpha = tangents[i] / m[i]
+            let beta = tangents[i + 1] / m[i]
+            if alpha < 0 { tangents[i] = 0 }
+            if beta < 0 { tangents[i + 1] = 0 }
+            let mag = alpha * alpha + beta * beta
+            if mag > 9 {
+                let tau = 3.0 / sqrt(mag)
+                tangents[i] = tau * alpha * m[i]
+                tangents[i + 1] = tau * beta * m[i]
+            }
+        }
+
+        let h = dx[k]
+        guard h > 0 else { return pts[k].y }
+        let tt = (clamped - pts[k].x) / h
+        let h00 = (1 + 2 * tt) * (1 - tt) * (1 - tt)
+        let h10 = tt * (1 - tt) * (1 - tt)
+        let h01 = tt * tt * (3 - 2 * tt)
+        let h11 = tt * tt * (tt - 1)
+        let result = h00 * pts[k].y + h10 * h * tangents[k] + h01 * pts[k + 1].y + h11 * h * tangents[k + 1]
+        return min(max(result, 0), 1)
     }
 }
 

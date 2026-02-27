@@ -115,7 +115,13 @@ enum EasingPreset: String, CaseIterable, Identifiable, Codable {
     case gradual = "Gradual"
     case smooth = "Smooth"
     case snappy = "Snappy"
+    case custom = "Custom"
     var id: String { rawValue }
+}
+
+struct CurvePoint: Codable, Equatable {
+    var x: Double
+    var y: Double
 }
 
 enum SlowMultiplierPreset: String, CaseIterable, Identifiable {
@@ -154,8 +160,12 @@ struct AppScrollProfile: Codable, Equatable {
     var fastMultiplier: Double
     var slowMultiplier: Double
     var easingPreset: String = "Smooth"
+    var customEasingMode: String = "sliders"
+    var customEasingFriction: Double = 0.96
+    var customEasingShape: Double = 0.0
+    var customEasingPoints: String = "[]"
 
-    init(baseSpeed: Double, smoothness: Double, momentumDuration: Double, scrollAccelerationEnabled: Bool, scrollDistanceMultiplier: Double, reverseVertical: Bool, reverseHorizontal: Bool, horizontalScrollEnabled: Bool, verticalScrollEnabled: Bool = true, modifierHotkeysEnabled: Bool, fastModifier: String, slowModifier: String, fastMultiplier: Double, slowMultiplier: Double, easingPreset: String = "Smooth") {
+    init(baseSpeed: Double, smoothness: Double, momentumDuration: Double, scrollAccelerationEnabled: Bool, scrollDistanceMultiplier: Double, reverseVertical: Bool, reverseHorizontal: Bool, horizontalScrollEnabled: Bool, verticalScrollEnabled: Bool = true, modifierHotkeysEnabled: Bool, fastModifier: String, slowModifier: String, fastMultiplier: Double, slowMultiplier: Double, easingPreset: String = "Smooth", customEasingMode: String = "sliders", customEasingFriction: Double = 0.96, customEasingShape: Double = 0.0, customEasingPoints: String = "[]") {
         self.baseSpeed = baseSpeed
         self.smoothness = smoothness
         self.momentumDuration = momentumDuration
@@ -171,6 +181,10 @@ struct AppScrollProfile: Codable, Equatable {
         self.fastMultiplier = fastMultiplier
         self.slowMultiplier = slowMultiplier
         self.easingPreset = easingPreset
+        self.customEasingMode = customEasingMode
+        self.customEasingFriction = customEasingFriction
+        self.customEasingShape = customEasingShape
+        self.customEasingPoints = customEasingPoints
     }
 
     init(from decoder: Decoder) throws {
@@ -190,6 +204,10 @@ struct AppScrollProfile: Codable, Equatable {
         fastMultiplier = try container.decode(Double.self, forKey: .fastMultiplier)
         slowMultiplier = try container.decode(Double.self, forKey: .slowMultiplier)
         easingPreset = try container.decodeIfPresent(String.self, forKey: .easingPreset) ?? "Smooth"
+        customEasingMode = try container.decodeIfPresent(String.self, forKey: .customEasingMode) ?? "sliders"
+        customEasingFriction = try container.decodeIfPresent(Double.self, forKey: .customEasingFriction) ?? 0.96
+        customEasingShape = try container.decodeIfPresent(Double.self, forKey: .customEasingShape) ?? 0.0
+        customEasingPoints = try container.decodeIfPresent(String.self, forKey: .customEasingPoints) ?? "[]"
     }
 }
 
@@ -211,6 +229,10 @@ class ScrollConfig: ObservableObject {
     @AppStorage("verticalScrollEnabled") var verticalScrollEnabled = true
 
     @AppStorage("easingPreset") var easingPreset = "Smooth"
+    @AppStorage("customEasingMode") var customEasingMode = "sliders"
+    @AppStorage("customEasingFriction") var customEasingFriction = 0.96
+    @AppStorage("customEasingShape") var customEasingShape = 0.0
+    @AppStorage("customEasingPoints") var customEasingPoints = "[]"
 
     @AppStorage("scrollAccelerationEnabled") var scrollAccelerationEnabled = true
     @AppStorage("reverseVertical") var reverseVertical = false
@@ -295,7 +317,11 @@ class ScrollConfig: ObservableObject {
             slowModifier: slowModifier,
             fastMultiplier: fastMultiplier,
             slowMultiplier: slowMultiplier,
-            easingPreset: easingPreset
+            easingPreset: easingPreset,
+            customEasingMode: customEasingMode,
+            customEasingFriction: customEasingFriction,
+            customEasingShape: customEasingShape,
+            customEasingPoints: customEasingPoints
         )
     }
 
@@ -306,6 +332,8 @@ class ScrollConfig: ObservableObject {
     static let fastMultiplierRange = 1.5...5.0
     static let slowMultiplierRange = 0.1...0.8
     static let scrollDistanceMultiplierRange = 0.25...3.0
+    static let customEasingFrictionRange = 0.90...0.995
+    static let customEasingShapeRange = -0.50...0.15
 
     @Published var speedPreset: SpeedPreset = .medium
     @Published var smoothnessPreset: SmoothnessPreset = .regular
@@ -406,6 +434,10 @@ class ScrollConfig: ObservableObject {
         scrollDistanceMultiplier = 1.0
         scrollDistancePreset = .default
         easingPreset = "Smooth"
+        customEasingMode = "sliders"
+        customEasingFriction = 0.96
+        customEasingShape = 0.0
+        customEasingPoints = "[]"
         globalHotkeyEnabled = false
         globalHotkeyKeyCode = 34
         globalHotkeyModifiers = 768
