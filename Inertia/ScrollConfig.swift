@@ -110,6 +110,14 @@ enum FastMultiplierPreset: String, CaseIterable, Identifiable {
     }
 }
 
+enum EasingPreset: String, CaseIterable, Identifiable, Codable {
+    case smooth = "Smooth"
+    case snappy = "Snappy"
+    case linear = "Linear"
+    case gradual = "Gradual"
+    var id: String { rawValue }
+}
+
 enum SlowMultiplierPreset: String, CaseIterable, Identifiable {
     case light = "Light"
     case half = "Half"
@@ -145,8 +153,9 @@ struct AppScrollProfile: Codable, Equatable {
     var slowModifier: String
     var fastMultiplier: Double
     var slowMultiplier: Double
+    var easingPreset: String = "Smooth"
 
-    init(baseSpeed: Double, smoothness: Double, momentumDuration: Double, scrollAccelerationEnabled: Bool, scrollDistanceMultiplier: Double, reverseVertical: Bool, reverseHorizontal: Bool, horizontalScrollEnabled: Bool, verticalScrollEnabled: Bool = true, modifierHotkeysEnabled: Bool, fastModifier: String, slowModifier: String, fastMultiplier: Double, slowMultiplier: Double) {
+    init(baseSpeed: Double, smoothness: Double, momentumDuration: Double, scrollAccelerationEnabled: Bool, scrollDistanceMultiplier: Double, reverseVertical: Bool, reverseHorizontal: Bool, horizontalScrollEnabled: Bool, verticalScrollEnabled: Bool = true, modifierHotkeysEnabled: Bool, fastModifier: String, slowModifier: String, fastMultiplier: Double, slowMultiplier: Double, easingPreset: String = "Smooth") {
         self.baseSpeed = baseSpeed
         self.smoothness = smoothness
         self.momentumDuration = momentumDuration
@@ -161,6 +170,7 @@ struct AppScrollProfile: Codable, Equatable {
         self.slowModifier = slowModifier
         self.fastMultiplier = fastMultiplier
         self.slowMultiplier = slowMultiplier
+        self.easingPreset = easingPreset
     }
 
     init(from decoder: Decoder) throws {
@@ -179,6 +189,7 @@ struct AppScrollProfile: Codable, Equatable {
         slowModifier = try container.decode(String.self, forKey: .slowModifier)
         fastMultiplier = try container.decode(Double.self, forKey: .fastMultiplier)
         slowMultiplier = try container.decode(Double.self, forKey: .slowMultiplier)
+        easingPreset = try container.decodeIfPresent(String.self, forKey: .easingPreset) ?? "Smooth"
     }
 }
 
@@ -198,6 +209,8 @@ class ScrollConfig: ObservableObject {
 
     @AppStorage("horizontalScrollEnabled") var horizontalScrollEnabled = true
     @AppStorage("verticalScrollEnabled") var verticalScrollEnabled = true
+
+    @AppStorage("easingPreset") var easingPreset = "Smooth"
 
     @AppStorage("scrollAccelerationEnabled") var scrollAccelerationEnabled = true
     @AppStorage("reverseVertical") var reverseVertical = false
@@ -281,7 +294,8 @@ class ScrollConfig: ObservableObject {
             fastModifier: fastModifier,
             slowModifier: slowModifier,
             fastMultiplier: fastMultiplier,
-            slowMultiplier: slowMultiplier
+            slowMultiplier: slowMultiplier,
+            easingPreset: easingPreset
         )
     }
 
@@ -340,6 +354,10 @@ class ScrollConfig: ObservableObject {
         suppressPresetSync = false
     }
 
+    func applyEasingPreset(_ preset: EasingPreset) {
+        easingPreset = preset.rawValue
+    }
+
     func baseSpeedChanged() {
         guard !suppressPresetSync else { return }
         let match = SpeedPreset.allCases.first {
@@ -387,6 +405,7 @@ class ScrollConfig: ObservableObject {
         reverseHorizontal = false
         scrollDistanceMultiplier = 1.0
         scrollDistancePreset = .default
+        easingPreset = "Smooth"
         globalHotkeyEnabled = false
         globalHotkeyKeyCode = 34
         globalHotkeyModifiers = 768

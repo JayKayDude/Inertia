@@ -74,6 +74,7 @@ struct SettingsView: View {
                 speedSliderSection
                 smoothnessSection
                 momentumDurationSliderSection
+                easingSection
                 scrollAccelerationToggle
                 footerSection
             }
@@ -145,11 +146,13 @@ struct SettingsView: View {
 
             HStack(spacing: 8) {
                 ForEach(SpeedPreset.allCases.filter { $0 != .custom }) { preset in
-                    Button(preset.rawValue) {
-                        config.applySpeedPreset(preset)
+                    if config.speedPreset == preset {
+                        Button(preset.rawValue) { config.applySpeedPreset(preset) }
+                            .buttonStyle(.borderedProminent)
+                    } else {
+                        Button(preset.rawValue) { config.applySpeedPreset(preset) }
+                            .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.bordered)
-                    .tint(config.speedPreset == preset ? .accentColor : nil)
                 }
             }
         }
@@ -177,6 +180,32 @@ struct SettingsView: View {
         }
     }
 
+    private var easingSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Easing")
+                .font(.headline)
+
+            HStack(alignment: .top, spacing: 8) {
+                ForEach(EasingPreset.allCases) { preset in
+                    VStack(spacing: 2) {
+                        if config.easingPreset == preset.rawValue {
+                            Button(preset.rawValue) { config.applyEasingPreset(preset) }
+                                .buttonStyle(.borderedProminent)
+                        } else {
+                            Button(preset.rawValue) { config.applyEasingPreset(preset) }
+                                .buttonStyle(.bordered)
+                        }
+
+                        Text("Default")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .opacity(preset == .smooth ? 1 : 0)
+                    }
+                }
+            }
+        }
+    }
+
     private var scrollAccelerationToggle: some View {
         Toggle("Scroll Acceleration", isOn: $config.scrollAccelerationEnabled)
             .toggleStyle(.switch)
@@ -189,11 +218,13 @@ struct SettingsView: View {
 
             HStack(spacing: 8) {
                 ForEach(SmoothnessPreset.allCases.filter { $0 != .custom }) { preset in
-                    Button(preset.rawValue) {
-                        config.applySmoothnessPreset(preset)
+                    if config.smoothnessPreset == preset {
+                        Button(preset.rawValue) { config.applySmoothnessPreset(preset) }
+                            .buttonStyle(.borderedProminent)
+                    } else {
+                        Button(preset.rawValue) { config.applySmoothnessPreset(preset) }
+                            .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.bordered)
-                    .tint(config.smoothnessPreset == preset ? .accentColor : nil)
                 }
             }
         }
@@ -344,11 +375,13 @@ struct SettingsView: View {
 
             HStack(spacing: 8) {
                 ForEach(ScrollDistancePreset.allCases.filter { $0 != .custom }) { preset in
-                    Button(preset.rawValue) {
-                        config.applyScrollDistancePreset(preset)
+                    if config.scrollDistancePreset == preset {
+                        Button(preset.rawValue) { config.applyScrollDistancePreset(preset) }
+                            .buttonStyle(.borderedProminent)
+                    } else {
+                        Button(preset.rawValue) { config.applyScrollDistancePreset(preset) }
+                            .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.bordered)
-                    .tint(config.scrollDistancePreset == preset ? .accentColor : nil)
                 }
             }
 

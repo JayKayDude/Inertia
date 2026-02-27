@@ -26,6 +26,11 @@ class ScrollEngine: ObservableObject {
     private var cachedFriction: Double = 0.96
     private var cachedBaseSpeed: Double = 4.0
     private var cachedSmoothness: Double = 0.6
+    private var cachedEasingPreset: EasingPreset = .smooth
+    private var momentumPhaseStarted: Bool = false
+    private var momentumFrameCount: Int = 0
+    private var momentumInitialVelocity: Double = 0
+    private var cachedTotalFrames: Double = 120
 
     private var cachedScrollAccelerationEnabled: Bool = true
     private var cachedReverseVertical: Bool = false
@@ -62,6 +67,11 @@ class ScrollEngine: ObservableObject {
     private static let velocityThreshold: Double = 30.0
     private static let pixelsPerLine: Double = 10.0
     private static let referenceSmoothness: Double = 0.9
+
+    private func estimatedTotalFrames(friction: Double, initialV: Double) -> Double {
+        guard friction > 0 && friction < 1 && abs(initialV) > Self.velocityThreshold else { return 120 }
+        return log(Self.velocityThreshold / abs(initialV)) / log(friction)
+    }
 
     func start() {
         guard !isRunning else { return }
@@ -194,6 +204,7 @@ class ScrollEngine: ObservableObject {
         let halfLifeSeconds = 0.02 + md * 0.2
         let halfLifeFrames = halfLifeSeconds * 120.0
         cachedFriction = pow(0.5, 1.0 / halfLifeFrames)
+        cachedEasingPreset = EasingPreset(rawValue: resolved.easingPreset) ?? .smooth
 
         let direction: Double = rawDelta > 0 ? 1.0 : -1.0
         let effectiveDirection = (isHorizontal ? cachedReverseHorizontal : cachedReverseVertical) ? -direction : direction
@@ -247,10 +258,11 @@ class ScrollEngine: ObservableObject {
             lineSubPixelAccumulatorX = 0
             scrollAxisIsHorizontal = isHorizontal
             consecutiveSwipeCount = 0
+            momentumPhaseStarted = false
         }
 
-        if effectiveDirection > 0 && velocity < 0 { velocity = 0 }
-        if effectiveDirection < 0 && velocity > 0 { velocity = 0 }
+        if effectiveDirection > 0 && velocity < 0 { velocity = 0; momentumPhaseStarted = false }
+        if effectiveDirection < 0 && velocity > 0 { velocity = 0; momentumPhaseStarted = false }
         velocity = velocity * effectiveSmoothness + impulse * compensation
         let maxVelocity = cachedBaseSpeed * 3.0 * ScrollEngine.pixelsPerTick * 4.0 * fast
         velocity = min(max(velocity, -maxVelocity), maxVelocity)
@@ -346,6 +358,8 @@ class ScrollEngine: ObservableObject {
         lineSubPixelAccumulatorX = 0
         consecutiveSwipeCount = 0
         consecutiveTickCount = 0
+        momentumPhaseStarted = false
+        momentumFrameCount = 0
         animationTimer?.cancel()
         animationTimer = nil
         lock.unlock()
@@ -353,7 +367,37 @@ class ScrollEngine: ObservableObject {
 
     private func animationFrame() {
         lock.lock()
-        velocity *= cachedFriction
+
+        let inMomentum = CFAbsoluteTimeGetCurrent() - lastTickTime > 0.15
+
+        if inMomentum && !momentumPhaseStarted {
+            momentumPhaseStarted = true
+            momentumFrameCount = 0
+            momentumInitialVelocity = velocity
+            cachedTotalFrames = max(estimatedTotalFrames(friction: cachedFriction, initialV: velocity), 10)
+        }
+
+        if inMomentum && momentumPhaseStarted {
+            momentumFrameCount += 1
+            let t = min(Double(momentumFrameCount) / cachedTotalFrames, 1.0)
+
+            switch cachedEasingPreset {
+            case .smooth:
+                velocity *= cachedFriction
+            case .snappy:
+                let f = cachedFriction * (1.0 - 0.08 * (1.0 - t))
+                velocity *= f
+            case .linear:
+                let decrement = abs(momentumInitialVelocity) / cachedTotalFrames
+                let sign: Double = velocity > 0 ? 1.0 : -1.0
+                velocity = sign * max(abs(velocity) - decrement, 0)
+            case .gradual:
+                let f = cachedFriction + (1.0 - cachedFriction) * 0.5 * (1.0 - t)
+                velocity *= f
+            }
+        } else {
+            velocity *= cachedFriction
+        }
 
         if abs(velocity) < ScrollEngine.velocityThreshold {
             animating = false
@@ -362,13 +406,13 @@ class ScrollEngine: ObservableObject {
             lineSubPixelAccumulator = 0
             subPixelAccumulatorX = 0
             lineSubPixelAccumulatorX = 0
+            momentumPhaseStarted = false
+            momentumFrameCount = 0
             animationTimer?.cancel()
             animationTimer = nil
             lock.unlock()
             return
         }
-
-        let inMomentum = CFAbsoluteTimeGetCurrent() - lastTickTime > 0.15
         let originWindow = scrollOriginWindow
         let isH = scrollAxisIsHorizontal
         let delta = velocity * ScrollEngine.frameInterval

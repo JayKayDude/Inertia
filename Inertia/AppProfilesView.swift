@@ -112,11 +112,13 @@ struct AppProfilesView: View {
 
                 HStack(spacing: 8) {
                     ForEach(SpeedPreset.allCases.filter { $0 != .custom }) { preset in
-                        Button(preset.rawValue) {
-                            updateProfile(bundleID: bundleID) { $0.baseSpeed = preset.baseSpeed }
+                        if matchesSpeedPreset(profile, preset) {
+                            Button(preset.rawValue) { updateProfile(bundleID: bundleID) { $0.baseSpeed = preset.baseSpeed } }
+                                .buttonStyle(.borderedProminent)
+                        } else {
+                            Button(preset.rawValue) { updateProfile(bundleID: bundleID) { $0.baseSpeed = preset.baseSpeed } }
+                                .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        .tint(matchesSpeedPreset(profile, preset) ? .accentColor : nil)
                     }
                 }
             }
@@ -148,14 +150,23 @@ struct AppProfilesView: View {
 
                 HStack(spacing: 8) {
                     ForEach(SmoothnessPreset.allCases.filter { $0 != .custom }) { preset in
-                        Button(preset.rawValue) {
-                            updateProfile(bundleID: bundleID) {
-                                $0.smoothness = preset.smoothness
-                                $0.momentumDuration = preset.momentumDuration
+                        if matchesSmoothnessPreset(profile, preset) {
+                            Button(preset.rawValue) {
+                                updateProfile(bundleID: bundleID) {
+                                    $0.smoothness = preset.smoothness
+                                    $0.momentumDuration = preset.momentumDuration
+                                }
                             }
+                            .buttonStyle(.borderedProminent)
+                        } else {
+                            Button(preset.rawValue) {
+                                updateProfile(bundleID: bundleID) {
+                                    $0.smoothness = preset.smoothness
+                                    $0.momentumDuration = preset.momentumDuration
+                                }
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        .tint(matchesSmoothnessPreset(profile, preset) ? .accentColor : nil)
                     }
                 }
             }
@@ -188,6 +199,31 @@ struct AppProfilesView: View {
                 )
             }
 
+            // Easing
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Easing")
+                    .font(.headline)
+
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach(EasingPreset.allCases) { preset in
+                        VStack(spacing: 2) {
+                            if profile.easingPreset == preset.rawValue {
+                                Button(preset.rawValue) { updateProfile(bundleID: bundleID) { $0.easingPreset = preset.rawValue } }
+                                    .buttonStyle(.borderedProminent)
+                            } else {
+                                Button(preset.rawValue) { updateProfile(bundleID: bundleID) { $0.easingPreset = preset.rawValue } }
+                                    .buttonStyle(.bordered)
+                            }
+
+                            Text("Default")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .opacity(preset == .smooth ? 1 : 0)
+                        }
+                    }
+                }
+            }
+
             // Scroll Acceleration
             Toggle("Scroll Acceleration", isOn: profileBinding(bundleID: bundleID, keyPath: \.scrollAccelerationEnabled))
                 .toggleStyle(.switch)
@@ -199,11 +235,13 @@ struct AppProfilesView: View {
 
                 HStack(spacing: 8) {
                     ForEach(ScrollDistancePreset.allCases.filter { $0 != .custom }) { preset in
-                        Button(preset.rawValue) {
-                            updateProfile(bundleID: bundleID) { $0.scrollDistanceMultiplier = preset.multiplier }
+                        if matchesDistancePreset(profile, preset) {
+                            Button(preset.rawValue) { updateProfile(bundleID: bundleID) { $0.scrollDistanceMultiplier = preset.multiplier } }
+                                .buttonStyle(.borderedProminent)
+                        } else {
+                            Button(preset.rawValue) { updateProfile(bundleID: bundleID) { $0.scrollDistanceMultiplier = preset.multiplier } }
+                                .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        .tint(matchesDistancePreset(profile, preset) ? .accentColor : nil)
                     }
                 }
 

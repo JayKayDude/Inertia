@@ -82,11 +82,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let window = NSWindow(contentViewController: hostingController)
         window.title = "Inertia Settings"
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-        window.setContentSize(NSSize(width: 520, height: 444))
+        window.setContentSize(NSSize(width: 520, height: 510))
         window.minSize = NSSize(width: 520, height: 300)
         window.delegate = self
-        window.center()
         window.isReleasedWhenClosed = false
+        window.center()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 
@@ -169,6 +169,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if !hasCompletedInitialLayout {
             hasCompletedInitialLayout = true
             window.setFrame(newFrame, display: true)
+            return
+        }
+
+        if abs(newFrame.height - window.frame.height) < 1 {
             return
         }
 
