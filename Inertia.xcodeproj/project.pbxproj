@@ -18,6 +18,7 @@
 		A1000001000000000000000B /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000000B /* HotkeyManager.swift */; };
 		A1000001000000000000000C /* AppBlacklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000000C /* AppBlacklistView.swift */; };
 		A1000001000000000000000D /* AppProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000000D /* AppProfilesView.swift */; };
+		A1000001000000000000000E /* EasingCurveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002000000000000000E /* EasingCurveView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		A1000002000000000000000B /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		A1000002000000000000000C /* AppBlacklistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBlacklistView.swift; sourceTree = "<group>"; };
 		A1000002000000000000000D /* AppProfilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppProfilesView.swift; sourceTree = "<group>"; };
+		A1000002000000000000000E /* EasingCurveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasingCurveView.swift; sourceTree = "<group>"; };
 		A10000030000000000000001 /* Inertia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inertia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -69,6 +71,7 @@
 				A1000002000000000000000B /* HotkeyManager.swift */,
 				A1000002000000000000000C /* AppBlacklistView.swift */,
 				A1000002000000000000000D /* AppProfilesView.swift */,
+				A1000002000000000000000E /* EasingCurveView.swift */,
 				A10000020000000000000007 /* Assets.xcassets */,
 				A10000020000000000000008 /* Info.plist */,
 				A1000002000000000000000A /* Inertia.entitlements */,
@@ -163,6 +166,7 @@
 				A1000001000000000000000B /* HotkeyManager.swift in Sources */,
 				A1000001000000000000000C /* AppBlacklistView.swift in Sources */,
 				A1000001000000000000000D /* AppProfilesView.swift in Sources */,
+				A1000001000000000000000E /* EasingCurveView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,6 +7,7 @@ class ScrollEngine: ObservableObject {
     static let shared = ScrollEngine()
 
     @Published var isRunning = false
+    @Published var momentumProgress: Double? = nil
 
     var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -263,6 +264,13 @@ class ScrollEngine: ObservableObject {
 
         if effectiveDirection > 0 && velocity < 0 { velocity = 0; momentumPhaseStarted = false }
         if effectiveDirection < 0 && velocity > 0 { velocity = 0; momentumPhaseStarted = false }
+        if momentumPhaseStarted {
+            momentumPhaseStarted = false
+            momentumFrameCount = 0
+            DispatchQueue.main.async { [weak self] in
+                self?.momentumProgress = nil
+            }
+        }
         velocity = velocity * effectiveSmoothness + impulse * compensation
         let maxVelocity = cachedBaseSpeed * 3.0 * ScrollEngine.pixelsPerTick * 4.0 * fast
         velocity = min(max(velocity, -maxVelocity), maxVelocity)
@@ -363,6 +371,9 @@ class ScrollEngine: ObservableObject {
         animationTimer?.cancel()
         animationTimer = nil
         lock.unlock()
+        DispatchQueue.main.async { [weak self] in
+            self?.momentumProgress = nil
+        }
     }
 
     private func animationFrame() {
@@ -395,6 +406,13 @@ class ScrollEngine: ObservableObject {
                 let f = cachedFriction + (1.0 - cachedFriction) * 0.5 * (1.0 - t)
                 velocity *= f
             }
+
+            if momentumFrameCount % 2 == 0 || momentumFrameCount == 1 {
+                let progress = t
+                DispatchQueue.main.async { [weak self] in
+                    self?.momentumProgress = progress
+                }
+            }
         } else {
             velocity *= cachedFriction
         }
@@ -411,6 +429,9 @@ class ScrollEngine: ObservableObject {
             animationTimer?.cancel()
             animationTimer = nil
             lock.unlock()
+            DispatchQueue.main.async { [weak self] in
+                self?.momentumProgress = nil
+            }
             return
         }
         let originWindow = scrollOriginWindow

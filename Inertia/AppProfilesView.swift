@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct AppProfilesView: View {
     @EnvironmentObject var config: ScrollConfig
+    @ObservedObject private var engine = ScrollEngine.shared
     @State private var runningApps: [NSRunningApplication] = []
     @State private var selection: String?
     @State private var profileTab = 0
@@ -222,6 +223,11 @@ struct AppProfilesView: View {
                         }
                     }
                 }
+
+                EasingCurveView(preset: EasingPreset(rawValue: profile.easingPreset) ?? .smooth,
+                                momentumDuration: profile.momentumDuration,
+                                momentumProgress: engine.momentumProgress)
+                    .frame(height: 80)
             }
 
             // Scroll Acceleration

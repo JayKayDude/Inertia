@@ -7,6 +7,7 @@ extension Notification.Name {
 
 struct SettingsView: View {
     @EnvironmentObject var config: ScrollConfig
+    @ObservedObject private var engine = ScrollEngine.shared
     @State private var loginItemRefresh = false
     @State private var verticalOptionsExpanded = false
     @State private var horizontalOptionsExpanded = false
@@ -203,6 +204,11 @@ struct SettingsView: View {
                     }
                 }
             }
+
+            EasingCurveView(preset: EasingPreset(rawValue: config.easingPreset) ?? .smooth,
+                            momentumDuration: config.momentumDuration,
+                            momentumProgress: engine.momentumProgress)
+                .frame(height: 80)
         }
     }
 

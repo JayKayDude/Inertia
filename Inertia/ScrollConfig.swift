@@ -111,10 +111,10 @@ enum FastMultiplierPreset: String, CaseIterable, Identifiable {
 }
 
 enum EasingPreset: String, CaseIterable, Identifiable, Codable {
-    case smooth = "Smooth"
-    case snappy = "Snappy"
     case linear = "Linear"
     case gradual = "Gradual"
+    case smooth = "Smooth"
+    case snappy = "Snappy"
     var id: String { rawValue }
 }
 
