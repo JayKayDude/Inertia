@@ -124,32 +124,55 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 
 ---
 
-## v3.0 — Pro Version
+## v2.1 — UI Polish (Complete)
 
-### Free vs Pro Tier ($5)
+### Animated Settings Window
+- [x] Settings window animates height on tab switch
+- [x] GeometryReader → NotificationCenter → AppDelegate → NSAnimationContext pipeline
+- [x] Width locked at 520pt, height user-adjustable
+- [x] HiDPI/non-HiDPI monitor transition handling
 
-**Free tier:**
-- Enable/disable toggle, launch at login
-- Speed presets (Slow/Medium/Fast) — no custom slider
-- Smoothness presets (Low/Regular/High) — no custom slider
-- Scroll distance presets (Half/Default/Double/Triple) — no custom slider
-- Scroll acceleration toggle
-- Reverse scroll direction
-- Smooth horizontal scrolling toggle
-- Global toggle hotkey
+### About Window
+- [x] Renamed CreditsView → AboutView
+- [x] App info, developer identity, credits in dedicated window
 
-**Pro tier ($5):**
-- All custom sliders (base speed, smoothness, scroll distance)
-- Modifier hotkeys (fast/slow scroll with customizable keys and multipliers)
-- Per-app scroll profiles (full profile editor)
-- Per-app blacklist
+### Vertical Scroll Toggle
+- [x] Option to disable vertical scroll smoothing independently
 
-### Implementation Plan
-- [ ] Simple local flag (`isPro` in @AppStorage) — placeholder for real payment
-- [ ] Gate custom sliders behind Pro (presets remain free)
-- [ ] Hide per-app profiles tab entirely for free users
-- [ ] Hide blacklist section for free users
-- [ ] Hide modifier hotkeys section for free users
-- [ ] Add "Inertia Pro" note in app listing available Pro features
-- [ ] Add Pro features list to README
-- [ ] Wire up actual payment (StoreKit 2 or license key — TBD)
+---
+
+## v2.2 — Easing Curves (Complete)
+
+### Easing Presets
+- [x] 5 presets: Linear, Gradual, Smooth (default), Snappy, Custom
+- [x] Per-frame easing formulas in ScrollEngine
+- [x] Visual easing curve preview with live momentum dot indicator
+- [x] Preset buttons with "Default" caption under Smooth
+
+### Custom Easing — Slider Mode
+- [x] Decay slider (0.90–0.995) controls friction rate
+- [x] Shape slider (-0.50–0.15) controls curve shape (gradual ↔ snappy)
+- [x] Parametric formula: `v *= min(friction * (1 - shape * (1-t)), 1.0)`
+
+### Custom Easing — Point Editor Mode
+- [x] Click on graph to add control points
+- [x] Drag to reposition points (clamped to bounds, x-sorted)
+- [x] Click to select points (orange highlight, larger radius)
+- [x] Delete key or Delete Point button to remove selected point
+- [x] Fixed endpoints at (0, 1.0) and (1, 0) — not movable/removable
+- [x] Monotone cubic interpolation (Fritsch-Carlson) for smooth curves
+- [x] Engine sets velocity absolutely from curve: `v = initialV * curveValue(t)`
+- [x] Points stored as JSON-encoded `[{x, y}]` in @AppStorage
+
+### Undo/Redo & Reset
+- [x] CustomEasingUndoManager with separate stacks per mode (sliders vs points)
+- [x] Cmd+Z / Shift+Cmd+Z keyboard shortcuts via .keyboardShortcut on buttons
+- [x] Undo/Redo buttons in UI
+- [x] Reset Custom button (pushes current state to undo before resetting)
+
+### Per-App Profile Support
+- [x] Each app profile stores independent custom easing settings
+- [x] Mode, friction, shape, and points per profile
+- [x] Momentum dot only shows when scrolling on the profiled app
+- [x] activeScrollBundleID tracking in ScrollEngine
+

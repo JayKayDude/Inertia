@@ -34,6 +34,7 @@ Inertia is 100% free with no paywalls, no tiers, no locked features. Every featu
 | **Speed presets** | **Yes** | 3 presets | No | No | No |
 | **Custom speed slider** | **Yes** | No | Yes | Yes | Limited |
 | **Smoothness control** | **Presets + custom slider** | 3 presets | Duration slider | Animation time | Duration slider |
+| **Easing curve control** | **5 presets + sliders + visual curve editor** | 3 presets | Step/Gain/Duration sliders | Animation time | 22 styles + acceleration |
 | **Scroll distance presets** | **Yes (unique)** | No | No | No | No |
 | **Scroll distance slider** | **Yes** | No | Step size | Sensitivity | Line count |
 | **Modifier hotkeys** | **Yes (2 keys, adjustable multipliers)** | Yes (4 keys, fixed speed) | Yes (speed-up key) | No | Partial |
@@ -58,6 +59,7 @@ Inertia is 100% free with no paywalls, no tiers, no locked features. Every featu
 
 No competitor has these features at any price:
 
+- **Visual curve editor** — draw your own easing curve by placing and dragging control points on the graph, with live preview and undo/redo. No competitor offers this at any price
 - **Scroll acceleration toggle** — physics-based speed curve that scales with scroll speed, or disable it for linear constant-speed scrolling
 - **Global toggle hotkey** — one keyboard shortcut to enable/disable Inertia from anywhere. Persistent toggle, not hold-to-suppress
 - **Live preview** — test your scroll settings inside the app before using them system-wide
@@ -70,6 +72,7 @@ No competitor has these features at any price:
 - **Scroll acceleration** — Mos has no speed curve; Inertia scales scroll speed with wheel velocity
 - **Presets for quick setup** — Mos is sliders-only; Inertia has one-click presets for speed, smoothness, and distance
 - **Global toggle hotkey** — Mos only has hold-to-suppress; Inertia has a persistent on/off hotkey
+- **Visual curve editor** — Mos has parameter sliders; Inertia lets you draw the easing curve directly with draggable control points
 - **Live preview** — test settings in-app before applying system-wide
 
 ---
@@ -77,6 +80,8 @@ No competitor has these features at any price:
 ## Features
 
 - **Smooth inertial scrolling** — physics-based momentum that coasts naturally after each wheel tick
+- **Easing presets** — Linear, Gradual, Smooth, Snappy, or Custom — choose how momentum decays
+- **Custom easing** — fine-tune with Decay and Shape sliders, or draw your own curve with a visual point editor
 - **Speed presets** — Slow, Medium, Fast
 - **Custom speed slider** — fine-tune your exact scroll speed beyond presets
 - **Smoothness presets** — Low, Regular, High

@@ -480,6 +480,7 @@ struct AppProfilesView: View {
                     Label("Undo", systemImage: "arrow.uturn.backward")
                 }
                 .disabled(!canUndo)
+                .keyboardShortcut("z", modifiers: .command)
 
                 Button {
                     profilePerformRedo(bundleID: bundleID)
@@ -487,6 +488,7 @@ struct AppProfilesView: View {
                     Label("Redo", systemImage: "arrow.uturn.forward")
                 }
                 .disabled(!canRedo)
+                .keyboardShortcut("z", modifiers: [.command, .shift])
 
                 if !isSliders && selectedCurvePoint != nil {
                     Button(role: .destructive) {
@@ -496,6 +498,7 @@ struct AppProfilesView: View {
                     } label: {
                         Label("Delete Point", systemImage: "trash")
                     }
+                    .keyboardShortcut(.delete, modifiers: [])
                 }
             }
 

@@ -33,6 +33,9 @@ class ScrollEngine: ObservableObject {
     private var cachedCustomShape: Double = 0.0
     private var cachedCustomMode: String = "sliders"
     private var cachedCustomPoints: [CurvePoint] = []
+    private var cachedCurvePts: [CurvePoint] = []
+    private var cachedCurveDx: [Double] = []
+    private var cachedCurveTangents: [Double] = []
     private var momentumPhaseStarted: Bool = false
     private var momentumFrameCount: Int = 0
     private var momentumInitialVelocity: Double = 0
@@ -141,6 +144,13 @@ class ScrollEngine: ObservableObject {
         isRunning = false
     }
 
+    func reEnableEventTapIfNeeded() {
+        lock.lock()
+        let tap = isRunning ? eventTap : nil
+        lock.unlock()
+        if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
+    }
+
     func processScrollForPreview(deltaY: Double) -> Double {
         return deltaY * config.baseSpeed * ScrollEngine.pixelsPerTick * 0.3
     }
@@ -223,6 +233,9 @@ class ScrollEngine: ObservableObject {
                 cachedCustomPoints = pts
             } else {
                 cachedCustomPoints = []
+            }
+            if cachedCustomMode == "points" {
+                precomputeCurveTangents()
             }
         }
 
@@ -532,25 +545,19 @@ class ScrollEngine: ObservableObject {
         event.post(tap: .cgSessionEventTap)
     }
 
-    private func interpolateCurve(at t: Double) -> Double {
-        var pts = [CurvePoint(x: 0, y: 1)] + cachedCustomPoints.sorted(by: { $0.x < $1.x }) + [CurvePoint(x: 1, y: 0)]
+    private func precomputeCurveTangents() {
+        let pts = [CurvePoint(x: 0, y: 1)] + cachedCustomPoints.sorted(by: { $0.x < $1.x }) + [CurvePoint(x: 1, y: 0)]
         let n = pts.count
-        if n == 2 { return 1.0 - t }
-        let clamped = min(max(t, 0), 1)
-
-        var k = 0
-        for i in 0..<(n - 1) {
-            if clamped >= pts[i].x && clamped <= pts[i + 1].x { k = i; break }
-            if i == n - 2 { k = i }
+        if n == 2 {
+            cachedCurvePts = pts
+            cachedCurveDx = [1.0]
+            cachedCurveTangents = [-1.0, -1.0]
+            return
         }
 
-        let dx = Array(0..<(n - 1)).map { pts[$0 + 1].x - pts[$0].x }
-        let dy = Array(0..<(n - 1)).map { pts[$0 + 1].y - pts[$0].y }
-        var m = Array(repeating: 0.0, count: n)
-
-        for i in 0..<(n - 1) {
-            if dx[i] > 0 { m[i] = dy[i] / dx[i] } else { m[i] = 0 }
-        }
+        let dx = (0..<(n - 1)).map { pts[$0 + 1].x - pts[$0].x }
+        let dy = (0..<(n - 1)).map { pts[$0 + 1].y - pts[$0].y }
+        var m = (0..<(n - 1)).map { dx[$0] > 0 ? dy[$0] / dx[$0] : 0.0 }
 
         var tangents = Array(repeating: 0.0, count: n)
         tangents[0] = m[0]
@@ -564,7 +571,7 @@ class ScrollEngine: ObservableObject {
         }
 
         for i in 0..<(n - 1) {
-            guard dx[i] > 0 else { continue }
+            guard dx[i] > 0, m[i] != 0 else { continue }
             let alpha = tangents[i] / m[i]
             let beta = tangents[i + 1] / m[i]
             if alpha < 0 { tangents[i] = 0 }
@@ -577,8 +584,27 @@ class ScrollEngine: ObservableObject {
             }
         }
 
-        let h = dx[k]
+        cachedCurvePts = pts
+        cachedCurveDx = dx
+        cachedCurveTangents = tangents
+    }
+
+    private func interpolateCurve(at t: Double) -> Double {
+        let pts = cachedCurvePts
+        let n = pts.count
+        if n < 2 { return 1.0 - t }
+        if n == 2 { return 1.0 - t }
+        let clamped = min(max(t, 0), 1)
+
+        var k = 0
+        for i in 0..<(n - 1) {
+            if clamped >= pts[i].x && clamped <= pts[i + 1].x { k = i; break }
+            if i == n - 2 { k = i }
+        }
+
+        let h = cachedCurveDx[k]
         guard h > 0 else { return pts[k].y }
+        let tangents = cachedCurveTangents
         let tt = (clamped - pts[k].x) / h
         let h00 = (1 + 2 * tt) * (1 - tt) * (1 - tt)
         let h10 = tt * (1 - tt) * (1 - tt)
@@ -600,9 +626,7 @@ private func scrollCallback(
 
     if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
         NSLog("[Inertia] *** TAP DISABLED *** type=%d — re-enabling", type.rawValue)
-        if engine.isRunning, let tap = engine.eventTap {
-            CGEvent.tapEnable(tap: tap, enable: true)
-        }
+        engine.reEnableEventTapIfNeeded()
         return Unmanaged.passUnretained(event)
     }
 

@@ -284,7 +284,7 @@ struct EasingCurveView: View {
         }
 
         for i in 0..<(n - 1) {
-            guard dx[i] > 0 else { continue }
+            guard dx[i] > 0, m[i] != 0 else { continue }
             let alpha = tangents[i] / m[i]
             let beta = tangents[i + 1] / m[i]
             if alpha < 0 { tangents[i] = 0 }
