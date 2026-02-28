@@ -176,3 +176,20 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 - [x] Momentum dot only shows when scrolling on the profiled app
 - [x] activeScrollBundleID tracking in ScrollEngine
 
+---
+
+## v2.3 — Quality of Life (Planned)
+
+### Auto Updater
+- [ ] Integrate Sparkle framework for automatic update checks
+- [ ] Host appcast XML feed (GitHub Releases or separate hosting)
+- [ ] Check for updates on launch and periodically
+- [ ] User-facing "Check for Updates" menu item
+- [ ] Download and install updates in-place
+
+### Settings Export / Import
+- [ ] Export all @AppStorage values to a JSON file (speed, smoothness, easing, profiles, blacklist, hotkeys, custom curves)
+- [ ] Import settings from a JSON file, overwriting current config
+- [ ] UI in settings window (Export/Import buttons)
+- [ ] Useful for backup, migration between machines, or sharing configs
+
