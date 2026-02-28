@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreGraphics
+import UniformTypeIdentifiers
 
 enum ModifierKey: String, CaseIterable, Identifiable {
     case control = "control"
@@ -462,5 +463,97 @@ class ScrollConfig: ObservableObject {
             $0 != .custom && abs($0.multiplier - scrollDistanceMultiplier) < 0.01
         }
         scrollDistancePreset = distMatch ?? .custom
+    }
+
+    static let exportKeys: [String] = [
+        "enabled", "baseSpeed", "momentumDuration", "smoothness",
+        "modifierHotkeysEnabled", "fastModifier", "slowModifier", "fastMultiplier", "slowMultiplier",
+        "horizontalScrollEnabled", "verticalScrollEnabled",
+        "easingPreset", "customEasingMode", "customEasingFriction", "customEasingShape", "customEasingPoints",
+        "scrollAccelerationEnabled", "reverseVertical", "reverseHorizontal", "scrollDistanceMultiplier",
+        "blacklistedAppsJSON", "appProfilesJSON",
+        "globalHotkeyEnabled", "globalHotkeyKeyCode", "globalHotkeyModifiers"
+    ]
+
+    func exportSettings() {
+        var dict: [String: Any] = [:]
+        for key in Self.exportKeys {
+            if let value = UserDefaults.standard.object(forKey: key) {
+                dict[key] = value
+            }
+        }
+
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.propertyList]
+        panel.nameFieldStringValue = "Inertia Settings.plist"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+            try data.write(to: url)
+        } catch {
+            let alert = NSAlert()
+            alert.messageText = "Export Failed"
+            alert.informativeText = error.localizedDescription
+            alert.runModal()
+        }
+    }
+
+    func importSettings() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.propertyList]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        do {
+            let data = try Data(contentsOf: url)
+            guard let dict = try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] else {
+                let alert = NSAlert()
+                alert.messageText = "Import Failed"
+                alert.informativeText = "The file is not a valid Inertia settings file."
+                alert.runModal()
+                return
+            }
+
+            if let v = dict["enabled"] as? Bool { enabled = v }
+            if let v = dict["baseSpeed"] as? Double { baseSpeed = v }
+            if let v = dict["momentumDuration"] as? Double { momentumDuration = v }
+            if let v = dict["smoothness"] as? Double { smoothness = v }
+            if let v = dict["modifierHotkeysEnabled"] as? Bool { modifierHotkeysEnabled = v }
+            if let v = dict["fastModifier"] as? String { fastModifier = v }
+            if let v = dict["slowModifier"] as? String { slowModifier = v }
+            if let v = dict["fastMultiplier"] as? Double { fastMultiplier = v }
+            if let v = dict["slowMultiplier"] as? Double { slowMultiplier = v }
+            if let v = dict["horizontalScrollEnabled"] as? Bool { horizontalScrollEnabled = v }
+            if let v = dict["verticalScrollEnabled"] as? Bool { verticalScrollEnabled = v }
+            if let v = dict["easingPreset"] as? String { easingPreset = v }
+            if let v = dict["customEasingMode"] as? String { customEasingMode = v }
+            if let v = dict["customEasingFriction"] as? Double { customEasingFriction = v }
+            if let v = dict["customEasingShape"] as? Double { customEasingShape = v }
+            if let v = dict["customEasingPoints"] as? String { customEasingPoints = v }
+            if let v = dict["scrollAccelerationEnabled"] as? Bool { scrollAccelerationEnabled = v }
+            if let v = dict["reverseVertical"] as? Bool { reverseVertical = v }
+            if let v = dict["reverseHorizontal"] as? Bool { reverseHorizontal = v }
+            if let v = dict["scrollDistanceMultiplier"] as? Double { scrollDistanceMultiplier = v }
+            if let v = dict["blacklistedAppsJSON"] as? String { blacklistedAppsJSON = v }
+            if let v = dict["appProfilesJSON"] as? String { appProfilesJSON = v }
+            if let v = dict["globalHotkeyEnabled"] as? Bool { globalHotkeyEnabled = v }
+            if let v = dict["globalHotkeyKeyCode"] as? Int { globalHotkeyKeyCode = v }
+            if let v = dict["globalHotkeyModifiers"] as? Int { globalHotkeyModifiers = v }
+
+            syncPresetsFromValues()
+            objectWillChange.send()
+            HotkeyManager.shared.updateHotkey()
+
+            if enabled {
+                ScrollEngine.shared.stop()
+                ScrollEngine.shared.start()
+            }
+        } catch {
+            let alert = NSAlert()
+            alert.messageText = "Import Failed"
+            alert.informativeText = error.localizedDescription
+            alert.runModal()
+        }
     }
 }

@@ -64,6 +64,11 @@ struct AppBlacklistView: View {
             .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: .separatorColor)))
         }
         .onAppear { refreshRunningApps() }
+        .onChange(of: config.blacklistedAppsJSON) { _, _ in
+            if let sel = selection, !config.blacklistedBundleIDs.contains(sel) {
+                selection = nil
+            }
+        }
     }
 
     private func showAddMenu() {

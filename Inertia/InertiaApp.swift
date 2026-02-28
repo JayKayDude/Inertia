@@ -90,6 +90,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 
+        let accessoryVC = NSTitlebarAccessoryViewController()
+        accessoryVC.layoutAttribute = .trailing
+        let button = NSButton(image: NSImage(systemSymbolName: "ellipsis.circle", accessibilityDescription: "Settings Menu")!, target: self, action: #selector(showExportImportMenu(_:)))
+        button.bezelStyle = .accessoryBarAction
+        button.isBordered = false
+        accessoryVC.view = button
+        window.addTitlebarAccessoryViewController(accessoryVC)
+
         settingsWindow = window
         hasCompletedInitialLayout = false
 
@@ -193,6 +201,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return NSSize(width: 520, height: frameSize.height)
         }
         return frameSize
+    }
+
+    @objc func showExportImportMenu(_ sender: NSButton) {
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Export Settings...", action: #selector(exportSettings), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Import Settings...", action: #selector(importSettings), keyEquivalent: ""))
+        let point = NSPoint(x: 0, y: sender.bounds.height + 4)
+        menu.popUp(positioning: nil, at: point, in: sender)
+    }
+
+    @objc func exportSettings() {
+        ScrollConfig.shared.exportSettings()
+    }
+
+    @objc func importSettings() {
+        ScrollConfig.shared.importSettings()
     }
 
     func showAbout() {

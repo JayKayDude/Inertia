@@ -98,6 +98,11 @@ struct AppProfilesView: View {
             }
         }
         .onAppear { refreshRunningApps() }
+        .onChange(of: config.appProfilesJSON) { _, _ in
+            if let sel = selection, config.profile(for: sel) == nil {
+                selection = nil
+            }
+        }
         .onChange(of: selection) { _, _ in easingUndo.clear(); selectedCurvePoint = nil }
     }
 
