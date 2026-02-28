@@ -5,6 +5,7 @@ struct InertiaApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var config = ScrollConfig.shared
     @StateObject private var engine = ScrollEngine.shared
+    @StateObject private var updateChecker = UpdateChecker.shared
 
     var body: some Scene {
         MenuBarExtra("Inertia", image: "MenuBarIcon") {
@@ -29,6 +30,12 @@ struct InertiaApp: App {
 
             Button("About Inertia") {
                 appDelegate.showAbout()
+            }
+
+            if let version = updateChecker.availableVersion {
+                Button("Update Available (v\(version))") {
+                    NSWorkspace.shared.open(UpdateChecker.releasesPageURL)
+                }
             }
 
             Divider()
@@ -64,6 +71,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if ScrollConfig.shared.globalHotkeyEnabled {
             HotkeyManager.shared.register()
         }
+        UpdateChecker.shared.startPeriodicChecks()
     }
 
     func showSettings() {

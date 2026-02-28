@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AboutView: View {
+    @ObservedObject private var updateChecker = UpdateChecker.shared
+
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
@@ -18,6 +20,11 @@ struct AboutView: View {
                 Text("Version \(appVersion)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let version = updateChecker.availableVersion {
+                    Link("v\(version) available — download", destination: UpdateChecker.releasesPageURL)
+                        .font(.caption)
+                        .foregroundStyle(.green)
+                }
             }
 
             Divider()
