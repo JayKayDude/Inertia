@@ -159,7 +159,7 @@ Inertia is fully open source. This matters for a scroll utility because it runs 
 ### Download
 Download the latest `.app` from [Releases](https://github.com/JayKayDude/Inertia/releases).
 
-> **Note:** Inertia is not currently signed or notarized. On first launch, right-click the app and select **Open**, then click **Open** in the dialog. This is only needed once. Signed distribution may be added in the future.
+> **Note:** Inertia is not currently signed or notarized. On first launch, right-click the app and select **Open**, then click **Open** in the dialog. If that doesn't work, go to **System Settings > Privacy & Security**, scroll down, and click **Open Anyway**. This is only needed once. Signed distribution may be added in the future.
 
 ### Build from Source
 1. Clone this repo
