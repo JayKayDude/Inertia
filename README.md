@@ -35,14 +35,14 @@ Inertia is 100% free with no paywalls, no tiers, no locked features. Every featu
 | **Custom speed slider** | **Yes** | No | Yes | Yes | Limited |
 | **Smoothness control** | **Presets + custom slider** | 3 presets | Duration slider | Animation time | Duration slider |
 | **Easing curve control** | **5 presets + sliders + visual curve editor** | 3 presets | Step/Gain/Duration sliders | Animation time | 22 styles + acceleration |
-| **Scroll distance presets** | **Yes (unique)** | No | No | No | No |
+| **Scroll distance presets** | **Yes** | No | No | No | No |
 | **Scroll distance slider** | **Yes** | No | Step size | Sensitivity | Line count |
 | **Modifier hotkeys** | **Yes (2 keys, adjustable multipliers)** | Yes (4 keys, fixed speed) | Yes (speed-up key) | No | Partial |
 | **Per-app scroll profiles** | **Yes** | No | Yes | No | Yes |
 | **Per-app blacklist** | **Yes** | No | Yes | Yes | Yes |
 | **Reverse scroll direction** | **Per-axis** | Single toggle | Per-axis | Single toggle | Per-axis |
 | **Horizontal scrolling** | **Yes** | Yes | Yes | Yes | Yes |
-| **Vertical scroll toggle** | **Yes (unique)** | No | No | No | No |
+| **Vertical scroll toggle** | **Yes** | No | Yes | No | No |
 | **Scroll acceleration toggle** | **Yes** | No | No | No | Yes |
 | **Global toggle hotkey** | **Yes (unique)** | No | Hold-to-suppress | No | No |
 | **Live preview** | **Yes (unique)** | No | Scroll monitor | No | No |
@@ -53,18 +53,20 @@ Inertia is 100% free with no paywalls, no tiers, no locked features. Every featu
 | **Trackpad passthrough** | **Yes** | Yes | Yes | No | Partial |
 | **No telemetry** | **Yes (open source)** | Yes (open source) | Yes (open source, NC) | No | No |
 | **Works in Terminal** | **Yes** | Yes | Partial | Unknown | Unknown |
+| **Settings export/import** | **Yes (unique)** | No | No | No | No |
+| **Per-app momentum indicator** | **Yes (unique)** | No | No | No | No |
 | **Button remapping** | No | Yes | Yes | No | Yes |
 
 ### Unique to Inertia
 
 No competitor has these features at any price:
 
-- **Visual curve editor** — draw your own easing curve by placing and dragging control points on the graph, with live preview and undo/redo. No competitor offers this at any price
-- **Scroll acceleration toggle** — physics-based speed curve that scales with scroll speed, or disable it for linear constant-speed scrolling
+- **Visual curve editor** — draw your own easing curve by placing and dragging control points on the graph, with live preview and undo/redo
+- **Custom easing sliders** — fine-tune momentum with Decay and Shape controls for precise curve shaping beyond presets
 - **Global toggle hotkey** — one keyboard shortcut to enable/disable Inertia from anywhere. Persistent toggle, not hold-to-suppress
 - **Live preview** — test your scroll settings inside the app before using them system-wide
-- **Speed/smoothness/distance presets** — Slow/Medium/Fast, Low/Regular/High, Half/Default/Double/Triple. Pick one and go
-- **Vertical scroll toggle** — enable or disable smooth scrolling per axis independently
+- **Settings export/import** — export all settings to a file and import them on another machine or as a backup
+- **Per-app momentum indicator** — visual dot showing which app's scroll profile is actively driving momentum
 
 ### Advantages over Mos
 
@@ -97,6 +99,8 @@ No competitor has these features at any price:
 - **Per-app blacklist** — disable smooth scrolling entirely for specific apps
 - **Global toggle hotkey** — customizable keyboard shortcut to enable/disable Inertia from anywhere
 - **Live preview** — test your settings inside the app before using them system-wide
+- **Settings export/import** — export all settings to a file and import them on another machine or as a backup
+- **Per-app momentum indicator** — visual dot showing which app profile is actively driving scroll momentum
 - **Animated settings window** — settings window smoothly resizes when switching tabs or expanding sections
 - **Launch at login** — optionally start Inertia automatically on boot
 - **Lightweight** — menubar-only, no Dock icon, runs silently in the background
