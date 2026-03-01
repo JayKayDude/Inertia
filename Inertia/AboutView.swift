@@ -41,7 +41,7 @@ struct AboutView: View {
 
             Divider()
 
-            Button("Support Inertia") {}
+            Button("Support Inertia — Coming Soon") {}
                 .buttonStyle(.bordered)
                 .disabled(true)
 

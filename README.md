@@ -23,7 +23,7 @@ Inertia intercepts mouse wheel events and replaces them with smooth, physics-bas
 
 ## Why Inertia?
 
-Inertia is 100% free with no paywalls, no tiers, no locked features. Every feature is included — and several of them are unique to Inertia, not available in any competitor at any price.
+Inertia is 100% free with no paywalls, no tiers, no locked features. Every feature is included — and several of them are unique to Inertia, not available in any competitor at any price. Donations are coming soon for anyone who wants to support development.
 
 | | **Inertia** | Mac Mouse Fix | Mos | SmoothScroll | Smooze Pro |
 |---|---|---|---|---|---|
