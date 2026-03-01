@@ -9,6 +9,7 @@ class UpdateChecker: ObservableObject {
     static let releasesPageURL = URL(string: "https://github.com/JayKayDude/Inertia/releases/latest")!
 
     func startPeriodicChecks() {
+        timer?.invalidate()
         checkForUpdates()
         timer = Timer.scheduledTimer(withTimeInterval: 86400, repeats: true) { [weak self] _ in
             self?.checkForUpdates()
