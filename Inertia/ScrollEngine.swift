@@ -265,17 +265,20 @@ class ScrollEngine: ObservableObject {
         lastDirection = direction
 
         let speed = computeSpeed(tickRate: tickRate)
-        let fast = cachedScrollAccelerationEnabled ? fastScrollFactor() : 1.0
+        let holdingFast = cachedModifierHotkeysEnabled && flags.contains(cachedFastModifierFlags)
+        let fast = cachedScrollAccelerationEnabled ? fastScrollFactor(holdingFastModifier: holdingFast) : 1.0
         var impulse = effectiveDirection * speed * ScrollEngine.pixelsPerTick * fast
         impulse *= cachedScrollDistanceMultiplier
 
         if cachedModifierHotkeysEnabled {
-            if flags.contains(cachedFastModifierFlags) {
+            if holdingFast {
                 impulse *= cachedFastMultiplier
             } else if flags.contains(cachedSlowModifierFlags) {
                 impulse *= cachedSlowMultiplier
-                let minImpulse = effectiveDirection * ScrollEngine.pixelsPerLine * 0.25
+                let minImpulse = effectiveDirection * Self.velocityThreshold * 1.1
                 if abs(impulse) < abs(minImpulse) { impulse = minImpulse }
+                let maxSlowImpulse = cachedBaseSpeed * Self.pixelsPerTick * cachedSlowMultiplier
+                if abs(impulse) > maxSlowImpulse { impulse = effectiveDirection * maxSlowImpulse }
             }
         }
 
@@ -314,10 +317,10 @@ class ScrollEngine: ObservableObject {
         return nil
     }
 
-    private func fastScrollFactor() -> Double {
-        let threshold = 2
-        let initial = 1.33
-        let exponential = 7.5
+    private func fastScrollFactor(holdingFastModifier: Bool) -> Double {
+        let threshold = holdingFastModifier ? 4 : 3
+        let exponential = holdingFastModifier ? 1.5 : 7.5
+        let initial = holdingFastModifier ? 1.1 : 1.33
         if consecutiveSwipeCount < threshold { return 1.0 }
         let n = Double(consecutiveSwipeCount - threshold)
         let factor = initial * pow(exponential, n / exponential)
