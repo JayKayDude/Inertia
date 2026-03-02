@@ -226,6 +226,12 @@ App icon created by [Freepik — Flaticon](https://www.flaticon.com/free-icons/i
 
 ---
 
+## AI Disclosure
+
+This project was developed with AI assistance (Claude/Claude Code). All code has been reviewed and tested personally by me.
+
+---
+
 ## License
 
 Inertia License (based on the [MMF License](https://github.com/noah-nuebling/mac-mouse-fix/blob/master/License)) — free to use and modify. Derivative works must attribute Inertia and may not be sold unless they represent substantial independent work. See [LICENSE](LICENSE) for details.
