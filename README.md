@@ -117,7 +117,7 @@ Inertia runs entirely from the menu bar — no Dock icon, no floating windows, n
 
 Inertia is written in pure Swift with SwiftUI — the same native technologies Apple uses for its own apps. This matters:
 
-- **~1 MB on disk** — competitors range from 2–20 MB
+- **~1.6 MB on disk** — competitors range from 2–20 MB
 - **Minimal CPU usage** — native Swift compiles to optimized machine code, no runtime interpreter or garbage collector overhead
 - **Low memory footprint** — no Electron, no Java, no web views. Just native macOS code running close to the metal
 - **120Hz animation loop** — smooth momentum without waking the CPU more than necessary
