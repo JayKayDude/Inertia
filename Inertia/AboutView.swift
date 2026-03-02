@@ -59,6 +59,12 @@ struct AboutView: View {
                 )
 
                 creditEntry(
+                    name: "Mos",
+                    description: "Inspiration — by Caldis",
+                    url: "https://github.com/Caldis/Mos"
+                )
+
+                creditEntry(
                     name: "App Icon",
                     description: "Created by Freepik — Flaticon",
                     url: "https://www.flaticon.com/free-icons/inertia"

@@ -222,6 +222,8 @@ No kernel extensions, no launch daemons, no leftover processes. It's just an app
 
 Inertia's scroll physics are adapted from [Mac Mouse Fix](https://github.com/noah-nuebling/mac-mouse-fix) by Noah Nuebling. Inertia is a derivative work with substantial changes: completely rewritten engine in pure Swift, new SwiftUI interface, stripped to smooth scrolling only, and released free and open source. Full attribution is maintained in the app's About window.
 
+Inspired by [Mos](https://github.com/Caldis/Mos) by Caldis.
+
 App icon created by [Freepik — Flaticon](https://www.flaticon.com/free-icons/inertia).
 
 ---
