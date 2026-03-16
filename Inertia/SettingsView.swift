@@ -122,6 +122,7 @@ struct SettingsView: View {
                 .tag(4)
         }
         .frame(width: 520)
+        .padding(.top, 6)
         .onChange(of: selectedTab) { _, newTab in
             if let height = tabHeights[newTab] {
                 DispatchQueue.main.async {

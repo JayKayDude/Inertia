@@ -62,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var closeObserver: NSObjectProtocol?
     private var backingObserver: NSObjectProtocol?
     private var debounceWorkItem: DispatchWorkItem?
-    private let tabBarOffset: CGFloat = 28
+    private let tabBarOffset: CGFloat = 34
     private var hasCompletedInitialLayout = false
     private var lastContentHeight: CGFloat = 0
     private var blockBackingResize = false
