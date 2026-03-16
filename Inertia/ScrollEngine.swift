@@ -523,6 +523,11 @@ class ScrollEngine: ObservableObject {
             }
         }
 
+        let isDockHelper = cachedScrollTargetBundleID == "com.apple.dock.helper"
+        if isDockHelper {
+            intPixels = lineInt
+        }
+
         if intPixels == 0 { return }
 
         guard let event = CGEvent(source: nil) else { return }
