@@ -97,8 +97,11 @@ struct SettingsView: View {
     @State private var loginItemRefresh = false
     @State private var verticalOptionsExpanded = false
     @State private var horizontalOptionsExpanded = false
+    @ObservedObject private var updateChecker = UpdateChecker.shared
     @State private var selectedTab = 0
     @State private var tabHeights: [Int: CGFloat] = [3: 532]
+    @State private var isCheckingForUpdates = false
+    @State private var updateCheckStatus = ""
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -114,6 +117,9 @@ struct SettingsView: View {
             previewTab
                 .tabItem { Label("Preview", systemImage: "eye") }
                 .tag(3)
+            preferencesTab
+                .tabItem { Label("Preferences", systemImage: "wrench.and.screwdriver") }
+                .tag(4)
         }
         .frame(width: 520)
         .onChange(of: selectedTab) { _, newTab in
@@ -156,7 +162,6 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 enableToggle
-                launchAtLoginToggle
                 presetSection
                 speedSliderSection
                 smoothnessSection
@@ -207,6 +212,110 @@ struct SettingsView: View {
                         }
                     }
                 )
+        }
+    }
+
+    private var preferencesTab: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Menubar Icon")
+                        .font(.headline)
+                    HStack(spacing: 12) {
+                        iconStyleButton(title: "Low Profile", value: "lowProfile", imageName: "MenuBarIcon")
+                        iconStyleButton(title: "Colorful", value: "colorful", imageName: "MenuBarIconColorful")
+                    }
+                    Text("Change takes effect after restarting Inertia.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Divider()
+
+                launchAtLoginToggle
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Settings")
+                        .font(.headline)
+                    HStack(spacing: 12) {
+                        Button("Export Settings...") {
+                            ScrollConfig.shared.exportSettings()
+                        }
+                        Button("Import Settings...") {
+                            ScrollConfig.shared.importSettings()
+                        }
+                    }
+                }
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Updates")
+                        .font(.headline)
+                    HStack(spacing: 12) {
+                        Button("Check Now") {
+                            isCheckingForUpdates = true
+                            updateCheckStatus = ""
+                            UpdateChecker.shared.checkForUpdates()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                isCheckingForUpdates = false
+                                if let version = UpdateChecker.shared.availableVersion {
+                                    updateCheckStatus = "v\(version) available"
+                                } else {
+                                    updateCheckStatus = "Up to date"
+                                }
+                            }
+                        }
+                        .disabled(isCheckingForUpdates)
+
+                        if isCheckingForUpdates {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else if !updateCheckStatus.isEmpty {
+                            Text(updateCheckStatus)
+                                .foregroundStyle(updateChecker.availableVersion != nil ? .blue : .secondary)
+                        }
+                    }
+                    if let version = updateChecker.availableVersion, !isCheckingForUpdates {
+                        Button("Download v\(version)") {
+                            NSWorkspace.shared.open(UpdateChecker.releasesPageURL)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+            }
+            .padding()
+            .background(
+                GeometryReader { geo in
+                    Color.clear.onChange(of: geo.size.height, initial: true) { _, newHeight in
+                        updateTabHeight(4, newHeight)
+                    }
+                }
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func iconStyleButton(title: String, value: String, imageName: String) -> some View {
+        let content = Button {
+            config.menubarIconStyle = value
+        } label: {
+            VStack(spacing: 4) {
+                Image(imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 18, height: 18)
+                Text(title)
+                    .font(.caption)
+            }
+            .frame(width: 80, height: 50)
+        }
+        if config.menubarIconStyle == value {
+            content.buttonStyle(.borderedProminent)
+        } else {
+            content.buttonStyle(.bordered)
         }
     }
 

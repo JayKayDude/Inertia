@@ -240,6 +240,8 @@ class ScrollConfig: ObservableObject {
     @AppStorage("reverseHorizontal") var reverseHorizontal = false
     @AppStorage("scrollDistanceMultiplier") var scrollDistanceMultiplier = 1.0
 
+    @AppStorage("menubarIconStyle") var menubarIconStyle = "lowProfile"
+
     @AppStorage("blacklistedAppsJSON") var blacklistedAppsJSON = "[]"
 
     var blacklistedBundleIDs: Set<String> {
@@ -444,6 +446,7 @@ class ScrollConfig: ObservableObject {
         globalHotkeyModifiers = 768
         blacklistedAppsJSON = "[]"
         appProfilesJSON = "{}"
+        menubarIconStyle = "lowProfile"
     }
 
     private func syncPresetsFromValues() {
@@ -472,7 +475,8 @@ class ScrollConfig: ObservableObject {
         "easingPreset", "customEasingMode", "customEasingFriction", "customEasingShape", "customEasingPoints",
         "scrollAccelerationEnabled", "reverseVertical", "reverseHorizontal", "scrollDistanceMultiplier",
         "blacklistedAppsJSON", "appProfilesJSON",
-        "globalHotkeyEnabled", "globalHotkeyKeyCode", "globalHotkeyModifiers"
+        "globalHotkeyEnabled", "globalHotkeyKeyCode", "globalHotkeyModifiers",
+        "menubarIconStyle"
     ]
 
     func exportSettings() {
@@ -540,6 +544,7 @@ class ScrollConfig: ObservableObject {
             if let v = dict["globalHotkeyEnabled"] as? Bool { globalHotkeyEnabled = v }
             if let v = dict["globalHotkeyKeyCode"] as? Int { globalHotkeyKeyCode = v }
             if let v = dict["globalHotkeyModifiers"] as? Int { globalHotkeyModifiers = v }
+            if let v = dict["menubarIconStyle"] as? String { menubarIconStyle = v }
 
             syncPresetsFromValues()
             objectWillChange.send()

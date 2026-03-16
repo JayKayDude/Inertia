@@ -6,9 +6,14 @@ struct InertiaApp: App {
     @StateObject private var config = ScrollConfig.shared
     @StateObject private var engine = ScrollEngine.shared
     @StateObject private var updateChecker = UpdateChecker.shared
+    @AppStorage("menubarIconStyle") private var menubarIconStyle = "lowProfile"
+
+    private var menubarIconName: String {
+        menubarIconStyle == "colorful" ? "MenuBarIconColorful" : "MenuBarIcon"
+    }
 
     var body: some Scene {
-        MenuBarExtra("Inertia", image: "MenuBarIcon") {
+        MenuBarExtra("Inertia", image: menubarIconName) {
             Toggle("Enable Inertia", isOn: Binding(
                 get: { config.enabled },
                 set: { newValue in
@@ -97,14 +102,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.center()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-
-        let accessoryVC = NSTitlebarAccessoryViewController()
-        accessoryVC.layoutAttribute = .trailing
-        let button = NSButton(image: NSImage(systemSymbolName: "ellipsis.circle", accessibilityDescription: "Settings Menu")!, target: self, action: #selector(showExportImportMenu(_:)))
-        button.bezelStyle = .accessoryBarAction
-        button.isBordered = false
-        accessoryVC.view = button
-        window.addTitlebarAccessoryViewController(accessoryVC)
 
         settingsWindow = window
         hasCompletedInitialLayout = false
@@ -209,22 +206,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return NSSize(width: 520, height: frameSize.height)
         }
         return frameSize
-    }
-
-    @objc func showExportImportMenu(_ sender: NSButton) {
-        let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Export Settings...", action: #selector(exportSettings), keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Import Settings...", action: #selector(importSettings), keyEquivalent: ""))
-        let point = NSPoint(x: 0, y: sender.bounds.height + 4)
-        menu.popUp(positioning: nil, at: point, in: sender)
-    }
-
-    @objc func exportSettings() {
-        ScrollConfig.shared.exportSettings()
-    }
-
-    @objc func importSettings() {
-        ScrollConfig.shared.importSettings()
     }
 
     func showAbout() {
