@@ -21,7 +21,7 @@ struct AboutView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if let version = updateChecker.availableVersion {
-                    Link("v\(version) available — download", destination: UpdateChecker.releasesPageURL)
+                    Link("v\(version) available — download", destination: UpdateChecker.websiteURL)
                         .font(.caption)
                         .foregroundStyle(.green)
                 }
@@ -74,8 +74,12 @@ struct AboutView: View {
 
             Spacer()
 
-            Link("Inertia on GitHub", destination: URL(string: "https://github.com/JayKayDude/Inertia")!)
-                .font(.caption)
+            HStack(spacing: 16) {
+                Link("Website", destination: UpdateChecker.websiteURL)
+                    .font(.caption)
+                Link("GitHub", destination: URL(string: "https://github.com/JayKayDude/Inertia")!)
+                    .font(.caption)
+            }
         }
         .padding(24)
         .frame(width: 300)

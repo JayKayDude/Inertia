@@ -281,7 +281,7 @@ struct SettingsView: View {
                     }
                     if let version = updateChecker.availableVersion, !isCheckingForUpdates {
                         Button("Download v\(version)") {
-                            NSWorkspace.shared.open(UpdateChecker.releasesPageURL)
+                            NSWorkspace.shared.open(UpdateChecker.websiteURL)
                         }
                         .buttonStyle(.borderedProminent)
                     }

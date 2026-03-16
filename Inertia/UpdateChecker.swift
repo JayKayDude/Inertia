@@ -7,6 +7,7 @@ class UpdateChecker: ObservableObject {
     private var timer: Timer?
     private let releasesURL = URL(string: "https://api.github.com/repos/JayKayDude/Inertia/releases/latest")!
     static let releasesPageURL = URL(string: "https://github.com/JayKayDude/Inertia/releases/latest")!
+    static let websiteURL = URL(string: "https://inertia-scroll.vercel.app/")!
 
     func startPeriodicChecks() {
         timer?.invalidate()

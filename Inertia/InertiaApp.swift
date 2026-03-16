@@ -39,7 +39,7 @@ struct InertiaApp: App {
 
             if let version = updateChecker.availableVersion {
                 Button("Update Available (v\(version))") {
-                    NSWorkspace.shared.open(UpdateChecker.releasesPageURL)
+                    NSWorkspace.shared.open(UpdateChecker.websiteURL)
                 }
             }
 
