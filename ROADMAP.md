@@ -178,18 +178,47 @@ Scroll engine, menubar, settings window with sliders, presets, live preview.
 
 ---
 
-## v2.3 — Quality of Life (Planned)
+## v2.3 — Update Checker & Export/Import (Complete)
 
-### Auto Updater
-- [ ] Integrate Sparkle framework for automatic update checks
-- [ ] Host appcast XML feed (GitHub Releases or separate hosting)
-- [ ] Check for updates on launch and periodically
-- [ ] User-facing "Check for Updates" menu item
-- [ ] Download and install updates in-place
+### Lightweight Update Checker
+- [x] Check GitHub Releases API on launch and every 24 hours
+- [x] Parse tag_name, numeric version comparison
+- [x] Show "Update Available" in menubar menu and About window
+- [x] Link to GitHub Releases page for download
 
 ### Settings Export / Import
-- [ ] Export all @AppStorage values to a JSON file (speed, smoothness, easing, profiles, blacklist, hotkeys, custom curves)
-- [ ] Import settings from a JSON file, overwriting current config
-- [ ] UI in settings window (Export/Import buttons)
-- [ ] Useful for backup, migration between machines, or sharing configs
+- [x] Export all @AppStorage values to a plist file
+- [x] Import settings from a plist file, overwriting current config
+- [x] UI via titlebar ellipsis menu button
+
+---
+
+## v2.3.1 — Scroll Modifier Fixes (Complete)
+
+- [x] Slow modifier minimum impulse floor (prevents swallowed ticks)
+- [x] Slow modifier speed cap (prevents acceleration ramp)
+- [x] Fast modifier ramp tuning (threshold 4, gentler curve 1.1x initial)
+- [x] Regular scroll acceleration threshold increased to 3 swipes
+
+---
+
+## v2.4 — Preferences Tab & Polish (Complete)
+
+### Preferences Tab
+- [x] New "Preferences" tab in settings window
+- [x] Menubar icon style picker (Low Profile / Colorful)
+- [x] Launch at Login moved from General to Preferences
+- [x] Export/Import buttons moved from titlebar to Preferences tab
+- [x] Manual "Check Now" update button with status display
+
+### Dock Folder Fix
+- [x] Smooth scrolling in Dock folder pop-ups (com.apple.dock.helper)
+- [x] Pixel delta substituted with line delta for Dock helper process
+
+### UX Polish
+- [x] Removed titlebar separator line in settings window
+- [x] Added top padding to tab bar for breathing room
+- [x] Added Mos credit to README and About window
+- [x] Added AI disclosure section to README
+- [x] "Support Inertia — Coming Soon" in About window
 

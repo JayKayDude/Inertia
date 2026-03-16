@@ -99,6 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.minSize = NSSize(width: 520, height: 300)
         window.delegate = self
         window.isReleasedWhenClosed = false
+        window.titlebarSeparatorStyle = .none
         window.center()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)

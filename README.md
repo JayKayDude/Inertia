@@ -101,6 +101,8 @@ No competitor has these features at any price:
 - **Live preview** — test your settings inside the app before using them system-wide
 - **Settings export/import** — export all settings to a file and import them on another machine or as a backup
 - **Per-app momentum indicator** — visual dot showing which app profile is actively driving scroll momentum
+- **Menubar icon style** — choose between a low-profile template icon or a colorful icon
+- **Update checker** — automatically checks GitHub for new versions and notifies you in the menu and About window
 - **Animated settings window** — settings window smoothly resizes when switching tabs or expanding sections
 - **Launch at login** — optionally start Inertia automatically on boot
 - **Lightweight** — menubar-only, no Dock icon, runs silently in the background
