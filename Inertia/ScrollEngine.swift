@@ -24,6 +24,7 @@ class ScrollEngine: ObservableObject {
     private var subPixelAccumulatorX: Double = 0
     private var lineSubPixelAccumulatorX: Double = 0
     private var scrollOriginWindow: Int = 0
+    private var cachedWindowLevel: Int = 0
 
     private var cachedFriction: Double = 0.96
     private var cachedBaseSpeed: Double = 4.0
@@ -191,6 +192,12 @@ class ScrollEngine: ObservableObject {
         lock.lock()
 
         scrollOriginWindow = windowUnderCursor()
+        if let windowInfoList = CGWindowListCopyWindowInfo([.optionIncludingWindow], CGWindowID(scrollOriginWindow)) as? [[String: Any]],
+           let info = windowInfoList.first {
+            cachedWindowLevel = info[kCGWindowLayer as String] as? Int ?? 0
+        } else {
+            cachedWindowLevel = 0
+        }
 
         let dt = now - lastTickTime
 
@@ -523,8 +530,8 @@ class ScrollEngine: ObservableObject {
             }
         }
 
-        let isDockHelper = cachedScrollTargetBundleID == "com.apple.dock.helper"
-        if isDockHelper {
+        let usesLineDelta = cachedScrollTargetBundleID == "com.apple.dock.helper" || cachedWindowLevel >= 101
+        if usesLineDelta {
             intPixels = lineInt
         }
 
