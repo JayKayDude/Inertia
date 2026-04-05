@@ -226,9 +226,6 @@ struct SettingsView: View {
                         iconStyleButton(title: "Low Profile", value: "lowProfile", imageName: "MenuBarIcon")
                         iconStyleButton(title: "Colorful", value: "colorful", imageName: "MenuBarIconColorful")
                     }
-                    Text("Change takes effect after restarting Inertia.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
 
                 Divider()

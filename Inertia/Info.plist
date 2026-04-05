@@ -4,6 +4,8 @@
 <dict>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSAppSleepDisabled</key>
+	<true/>
 	<key>NSAccessibilityUsageDescription</key>
 	<string>Inertia needs Accessibility access to intercept and transform mouse scroll wheel events into smooth inertial scrolling.</string>
 </dict>
